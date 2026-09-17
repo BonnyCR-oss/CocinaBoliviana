@@ -17,9 +17,9 @@ namespace CocinaBoliviana.Editor
         {
             EditorApplication.delayCall += () =>
             {
-                if (!SessionState.GetBool("KitchenBuilder_Executed_v3", false))
+                if (!SessionState.GetBool("KitchenBuilder_Executed_v4", false))
                 {
-                    SessionState.SetBool("KitchenBuilder_Executed_v3", true);
+                    SessionState.SetBool("KitchenBuilder_Executed_v4", true);
                     BuildKitchenScene();
                 }
             };
@@ -113,6 +113,20 @@ namespace CocinaBoliviana.Editor
                     xrOrigin.AddComponent<PlayerVoidGuard>();
                 }
                 EditorUtility.SetDirty(xrOrigin);
+
+                // Stop the HMD (real headset walking, or WASD in the XR Interaction Simulator) from
+                // clipping through walls/counters, since head tracking bypasses the CharacterController.
+                Camera headCamera = xrOrigin.GetComponentInChildren<Camera>();
+                if (headCamera != null)
+                {
+                    var headGuard = headCamera.GetComponent<HeadCollisionGuard>();
+                    if (headGuard == null)
+                    {
+                        headGuard = headCamera.gameObject.AddComponent<HeadCollisionGuard>();
+                    }
+                    headGuard.Initialize(xrOrigin.transform);
+                    EditorUtility.SetDirty(headCamera.gameObject);
+                }
             }
 
             // Clean previous kitchen environment

@@ -37,9 +37,9 @@ namespace CocinaBoliviana.Editor
                     }
                 }
 
-                if (needsBuild || !SessionState.GetBool("MainMenuBuilder_Executed_v4", false))
+                if (needsBuild || !SessionState.GetBool("MainMenuBuilder_Executed_v5", false))
                 {
-                    SessionState.SetBool("MainMenuBuilder_Executed_v4", true);
+                    SessionState.SetBool("MainMenuBuilder_Executed_v5", true);
                     BuildMainMenuScene();
                 }
             };
@@ -125,6 +125,19 @@ namespace CocinaBoliviana.Editor
             }
             xrOrigin.transform.position = new Vector3(0f, 0.05f, 0f);
             xrOrigin.transform.rotation = Quaternion.identity;
+
+            // Stop the HMD (real headset walking, or WASD in the XR Interaction Simulator) from
+            // clipping through the reception walls/table, since head tracking bypasses the CharacterController.
+            Camera menuHeadCamera = xrOrigin.GetComponentInChildren<Camera>();
+            if (menuHeadCamera != null)
+            {
+                var headGuard = menuHeadCamera.GetComponent<HeadCollisionGuard>();
+                if (headGuard == null)
+                {
+                    headGuard = menuHeadCamera.gameObject.AddComponent<HeadCollisionGuard>();
+                }
+                headGuard.Initialize(xrOrigin.transform);
+            }
 
             // 7. XR Interaction Manager & EventSystem
             GameObject xriManager = new GameObject("XR Interaction Manager");
