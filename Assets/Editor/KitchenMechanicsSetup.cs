@@ -26,9 +26,9 @@ namespace CocinaBoliviana.Editor
         }
         private const string ScenePath = "Assets/Scenes/First Scene.unity";
         private const string PrefabsFolder = "Assets/02_Prefabs";
-        private const string TomatoGlbPath = "Assets/Models/IngredientesModel/tomate.glb";
-        private const string TomatePicadoGlbPath = "Assets/Models/IngredientesModel/TomatePicado.glb";
-        private const string PlatePrefabPath = "Assets/Models/Plate.prefab";
+        private const string TomatoGlbPath = "Assets/04_Models/IngredientesModel/tomate.glb";
+        private const string TomatePicadoGlbPath = "Assets/04_Models/IngredientesModel/TomatePicado.glb";
+        private const string PlatePrefabPath = "Assets/04_Models/Plate.prefab";
         private const string KnifePrefabPath = "Assets/02_Prefabs/KnifeGRP.prefab";
 
         private const string TomatoPrefabPath = "Assets/02_Prefabs/Tomato_Item.prefab";

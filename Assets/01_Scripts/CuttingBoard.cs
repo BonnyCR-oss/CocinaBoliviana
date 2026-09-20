@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using CocinaBoliviana.Data;
 
 namespace CocinaBoliviana
 {
@@ -14,6 +15,10 @@ namespace CocinaBoliviana
         [SerializeField] private int requiredHits = 3;
         [SerializeField] private AudioClip chopSound;
         [SerializeField] private AudioClip cutCompleteSound;
+
+        [Header("Tipo de Estación")]
+        [Tooltip("Corte que produce esta tabla específica (ej: una tabla hace Rodajas, otra hace Cubitos).")]
+        [SerializeField] private TipoCorte tipoDeCorte = TipoCorte.Cubitos;
 
         private IngredientItem currentIngredient;
         private int hitsCount = 0;
@@ -125,11 +130,33 @@ namespace CocinaBoliviana
         {
             if (currentIngredient == null) return;
 
-            GameObject cutPrefabToSpawn = currentIngredient.CutPrefab != null ? currentIngredient.CutPrefab : defaultCutPrefab;
+            IngredientData sourceData = currentIngredient.Data;
+            GameObject cutPrefabToSpawn = null;
+
+            // 1. Prioridad: el IngredientData sabe qué prefab corresponde a ESTE tipo de corte
+            if (sourceData != null)
+            {
+                cutPrefabToSpawn = sourceData.ObtenerPrefabParaCorte(tipoDeCorte);
+            }
+
+            // 2. Fallback: prefabs configurados directamente en el IngredientItem/tabla (flujo legado)
+            if (cutPrefabToSpawn == null)
+            {
+                cutPrefabToSpawn = currentIngredient.CutPrefab != null ? currentIngredient.CutPrefab : defaultCutPrefab;
+            }
+
+            // Si esta tabla no sabe producir este corte para este ingrediente, no destruyas nada.
+            if (cutPrefabToSpawn == null)
+            {
+                Debug.LogWarning($"[CuttingBoard] {gameObject.name} no tiene un resultado configurado para {tipoDeCorte} con {currentIngredient.IngredientName}. Corte cancelado.");
+                hitsCount = requiredHits - 1;
+                return;
+            }
+
             Vector3 pos = currentIngredient.transform.position;
             Quaternion rot = currentIngredient.transform.rotation;
 
-            // Remove uncut tomato
+            // Remove uncut ingredient
             Destroy(currentIngredient.gameObject);
             currentIngredient = null;
             hitsCount = 0;
@@ -142,6 +169,12 @@ namespace CocinaBoliviana
                 IngredientItem cutItem = cutGo.GetComponent<IngredientItem>();
                 if (cutItem != null)
                 {
+                    if (sourceData != null)
+                    {
+                        cutItem.SetData(sourceData);
+                    }
+                    cutItem.SetCorteActual(tipoDeCorte);
+
                     currentIngredient = cutItem;
                     cutItem.SnapToCuttingBoard(this, pos, rot);
                 }
@@ -152,7 +185,7 @@ namespace CocinaBoliviana
                 audioSource.PlayOneShot(cutCompleteSound, 1.0f);
             }
 
-            Debug.Log("[CuttingBoard] ¡3 golpes completados! Tomate Picado generado y fijado a la tabla.");
+            Debug.Log($"[CuttingBoard] Corte completado ({tipoDeCorte}). Resultado fijado a la tabla.");
         }
 
         private IEnumerator DoPunchAnimation()

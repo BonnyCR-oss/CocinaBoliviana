@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3aec717ffec41b1fe89c357673e7ea44, type: 3}
+  m_Name: Silpancho
+  m_EditorClassIdentifier: Assembly-CSharp::CocinaBoliviana.Data.DishData
+  nombre: Silpancho
+  icono: {fileID: 0}
+  platoPrefab: {fileID: -6540145201173266139, guid: 926cf68523ef4e504badff1780e6994d, type: 3}
+  ingredientesRequeridos:
+  - {fileID: 11400000, guid: 45dfd7abe0b0f0484b1eded2b6205b6c, type: 2}
+  - {fileID: 11400000, guid: 8468b62a8bce9d70f90e56584c591cfc, type: 2}
+  - {fileID: 11400000, guid: a577d089357d0bc0c9c0b4e3c4bb046e, type: 2}
+  - {fileID: 11400000, guid: da37c04e5e709d7d2ab901859c7c7917, type: 2}
+  - {fileID: 11400000, guid: 1893d54cffd80fa8b9d3529c8eea39b7, type: 2}
+  - {fileID: 11400000, guid: 82272100148539be6965d91b1ac289a9, type: 2}
+  tiempoLimite: 25
+  puntos: 25

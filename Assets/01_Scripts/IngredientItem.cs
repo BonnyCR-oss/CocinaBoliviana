@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using CocinaBoliviana.Data;
 
 namespace CocinaBoliviana
 {
@@ -14,6 +15,10 @@ namespace CocinaBoliviana
         [SerializeField] private bool isCut = false;
         [SerializeField] private GameObject cutPrefab;
 
+        [Header("Dato de Ingrediente (ScriptableObject)")]
+        [SerializeField] private IngredientData data;
+
+        private TipoCorte corteActual = TipoCorte.Ninguno;
         private Rigidbody rb;
         private XRGrabInteractable grabInteractable;
         private CuttingBoard currentBoard;
@@ -22,9 +27,21 @@ namespace CocinaBoliviana
         public bool IsCut => isCut;
         public string IngredientName => ingredientName;
         public GameObject CutPrefab => cutPrefab;
+        public IngredientData Data => data;
+        public TipoCorte CorteActual => corteActual;
         public XRGrabInteractable GrabInteractable => grabInteractable;
         public CuttingBoard CurrentBoard => currentBoard;
         public PlateItem CurrentPlate => currentPlate;
+
+        public void SetData(IngredientData nuevoData)
+        {
+            data = nuevoData;
+        }
+
+        public void SetCorteActual(TipoCorte corte)
+        {
+            corteActual = corte;
+        }
 
         private void Awake()
         {

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace CocinaBoliviana.Data
@@ -6,11 +7,17 @@ namespace CocinaBoliviana.Data
     {
         Verdura,
         Carne,
-        Condimento,
-        Lacteo,
+        Salsa,
         Grano,
         Fruta,
         Otro
+    }
+
+    [System.Serializable]
+    public class ResultadoCorte
+    {
+        public TipoCorte tipo;
+        public GameObject prefabResultado;
     }
 
     [CreateAssetMenu(fileName = "NewIngredient", menuName = "Cocina Boliviana/Ingrediente")]
@@ -24,5 +31,20 @@ namespace CocinaBoliviana.Data
         [Header("Interacciones")]
         public bool sePuedeCortar;
         public bool sePuedeCocinar;
+
+        [Header("Cortes Posibles")]
+        public List<ResultadoCorte> cortesDisponibles = new List<ResultadoCorte>();
+
+        public GameObject ObtenerPrefabParaCorte(TipoCorte tipoDeCorte)
+        {
+            foreach (var corte in cortesDisponibles)
+            {
+                if (corte.tipo == tipoDeCorte)
+                {
+                    return corte.prefabResultado;
+                }
+            }
+            return null;
+        }
     }
 }

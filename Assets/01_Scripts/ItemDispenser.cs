@@ -6,6 +6,7 @@ using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Inputs.Readers;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
+using CocinaBoliviana.Data;
 
 namespace CocinaBoliviana
 {
@@ -14,6 +15,17 @@ namespace CocinaBoliviana
     {
         [Header("Dispenser Configuration")]
         [SerializeField] private GameObject itemPrefab;
+
+        [Tooltip("Opcional: si este dispensador reparte un IngredientData, referenciarlo aquí " +
+                 "permite usar el selector por categoría en el Inspector (botón 'Ingredient Picker').")]
+        [SerializeField] private IngredientData ingredienteReferencia;
+
+        [Header("Selección Múltiple (opcional)")]
+        [Tooltip("Si tiene 1 o más elementos, al interactuar se abre un menú para elegir cuál dispensar " +
+                 "en vez de dispensar 'Item Prefab' directamente.")]
+        [SerializeField] private List<IngredientData> opcionesIngredientes = new List<IngredientData>();
+        [SerializeField] private IngredientSelectorMenu menu;
+
         [SerializeField] private Transform spawnPoint;
         [SerializeField] private float cooldownTime = 0.35f;
         [SerializeField] private AudioClip dispenseSound;
@@ -49,12 +61,26 @@ namespace CocinaBoliviana
 
             selectEntered.AddListener(OnGripDispense);
             activated.AddListener(OnTriggerDispense);
+            hoverEntered.AddListener(OnHoverEnteredLog);
+            hoverExited.AddListener(OnHoverExitedLog);
+        }
+
+        private void OnHoverEnteredLog(HoverEnterEventArgs args)
+        {
+            Debug.Log($"[ItemDispenser] {gameObject.name}: HOVER ENTER de {args.interactorObject}.");
+        }
+
+        private void OnHoverExitedLog(HoverExitEventArgs args)
+        {
+            Debug.Log($"[ItemDispenser] {gameObject.name}: hover exit.");
         }
 
         protected override void OnDestroy()
         {
             selectEntered.RemoveListener(OnGripDispense);
             activated.RemoveListener(OnTriggerDispense);
+            hoverEntered.RemoveListener(OnHoverEnteredLog);
+            hoverExited.RemoveListener(OnHoverExitedLog);
             base.OnDestroy();
         }
 
@@ -199,11 +225,13 @@ namespace CocinaBoliviana
 
         private void OnGripDispense(SelectEnterEventArgs args)
         {
+            Debug.Log($"[ItemDispenser] {gameObject.name}: evento selectEntered (Grip) recibido de {args.interactorObject}.");
             DispenseToInteractor(args.interactorObject);
         }
 
         private void OnTriggerDispense(ActivateEventArgs args)
         {
+            Debug.Log($"[ItemDispenser] {gameObject.name}: evento activated (Trigger) recibido de {args.interactorObject}.");
             IXRSelectInteractor selectInteractor = args.interactorObject as IXRSelectInteractor;
             if (selectInteractor == null && args.interactorObject is Component comp)
             {
@@ -215,41 +243,78 @@ namespace CocinaBoliviana
 
         public void DispenseToInteractor(IXRSelectInteractor interactor, Transform fallbackTransform = null)
         {
-            if (itemPrefab == null)
+            Debug.Log($"[ItemDispenser] {gameObject.name}: DispenseToInteractor llamado. tieneMenu={opcionesIngredientes != null && opcionesIngredientes.Count > 0}, itemPrefab={(itemPrefab != null ? itemPrefab.name : "null")}, menu={(menu != null ? menu.name : "null")}.");
+
+            bool tieneMenu = opcionesIngredientes != null && opcionesIngredientes.Count > 0;
+
+            if (!tieneMenu && itemPrefab == null)
             {
                 Debug.LogWarning($"[ItemDispenser] {gameObject.name} does not have an itemPrefab assigned!");
                 return;
             }
 
-            if (Time.time - lastDispenseTime < cooldownTime) return;
-            lastDispenseTime = Time.time;
+            if (Time.time - lastDispenseTime < cooldownTime)
+            {
+                Debug.Log($"[ItemDispenser] {gameObject.name}: en cooldown, ignorado.");
+                return;
+            }
+            if (menu != null && menu.IsOpen)
+            {
+                Debug.Log($"[ItemDispenser] {gameObject.name}: el menú ya está abierto, ignorado.");
+                return;
+            }
 
             if (interactor == null)
             {
                 interactor = GetActiveOrHoveringInteractor();
             }
 
-            // Determine target hand transform
-            Transform handTransform = null;
+            Transform handTransform = ResolveHandTransform(interactor, fallbackTransform);
+
+            if (tieneMenu)
+            {
+                if (menu == null)
+                {
+                    Debug.LogWarning($"[ItemDispenser] {gameObject.name} tiene opciones configuradas pero no tiene un 'menu' (IngredientSelectorMenu) asignado.");
+                    return;
+                }
+
+                lastDispenseTime = Time.time;
+                menu.Show(opcionesIngredientes, elegido => SpawnItem(elegido != null ? elegido.prefab : null, interactor, handTransform));
+                return;
+            }
+
+            lastDispenseTime = Time.time;
+            SpawnItem(itemPrefab, interactor, handTransform);
+        }
+
+        private Transform ResolveHandTransform(IXRSelectInteractor interactor, Transform fallbackTransform)
+        {
             if (interactor is Component comp)
             {
-                handTransform = comp.transform;
+                return comp.transform;
             }
-            else if (fallbackTransform != null)
+            if (fallbackTransform != null)
             {
-                handTransform = fallbackTransform;
+                return fallbackTransform;
             }
-            else
+            var camera = Camera.main;
+            return (camera != null) ? camera.transform : transform;
+        }
+
+        private void SpawnItem(GameObject prefabToSpawn, IXRSelectInteractor interactor, Transform handTransform)
+        {
+            if (prefabToSpawn == null)
             {
-                var camera = Camera.main;
-                handTransform = (camera != null) ? camera.transform : transform;
+                Debug.LogWarning($"[ItemDispenser] {gameObject.name}: no hay prefab para dispensar.");
+                return;
             }
 
             Vector3 spawnPos = (spawnPoint != null) ? spawnPoint.position : handTransform.position + handTransform.forward * 0.12f;
             Quaternion spawnRot = (spawnPoint != null) ? spawnPoint.rotation : handTransform.rotation;
 
-            GameObject spawnedItem = Instantiate(itemPrefab, spawnPos, spawnRot);
-            spawnedItem.name = itemPrefab.name;
+            GameObject spawnedItem = Instantiate(prefabToSpawn, spawnPos, spawnRot);
+            spawnedItem.name = prefabToSpawn.name;
 
             var grabInteractable = spawnedItem.GetComponent<XRGrabInteractable>();
             if (grabInteractable != null && interactor != null)
