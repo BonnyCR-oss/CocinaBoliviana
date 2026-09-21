@@ -55,6 +55,12 @@ namespace CocinaBoliviana.Editor
 
         private static GameObject CreateTomatoPrefab(GameObject cutPrefab)
         {
+            // Si el prefab ya existe se devuelve tal cual: reconstruirlo desde cero borraba
+            // los ajustes hechos a mano (ángulo del AttachPoint, colliders, etc.).
+            // Para forzar un rebuild, borra el archivo y vuelve a correr el setup.
+            var yaExiste = AssetDatabase.LoadAssetAtPath<GameObject>(TomatoPrefabPath);
+            if (yaExiste != null) return yaExiste;
+
             GameObject root = new GameObject("Tomato_Item");
 
             var col = root.AddComponent<SphereCollider>();
@@ -96,6 +102,12 @@ namespace CocinaBoliviana.Editor
 
         private static GameObject CreateTomatePicadoPrefab()
         {
+            // Si el prefab ya existe se devuelve tal cual: reconstruirlo desde cero borraba
+            // los ajustes hechos a mano (ángulo del AttachPoint, colliders, etc.).
+            // Para forzar un rebuild, borra el archivo y vuelve a correr el setup.
+            var yaExiste = AssetDatabase.LoadAssetAtPath<GameObject>(TomatePicadoPrefabPath);
+            if (yaExiste != null) return yaExiste;
+
             GameObject root = new GameObject("TomatePicado_Item");
 
             var col = root.AddComponent<BoxCollider>();
@@ -133,6 +145,12 @@ namespace CocinaBoliviana.Editor
 
         private static GameObject CreatePlatePrefab()
         {
+            // Si el prefab ya existe se devuelve tal cual: reconstruirlo desde cero borraba
+            // los ajustes hechos a mano (ángulo del AttachPoint, colliders, etc.).
+            // Para forzar un rebuild, borra el archivo y vuelve a correr el setup.
+            var yaExiste = AssetDatabase.LoadAssetAtPath<GameObject>(PlateItemPrefabPath);
+            if (yaExiste != null) return yaExiste;
+
             var basePlate = AssetDatabase.LoadAssetAtPath<GameObject>(PlatePrefabPath);
             GameObject root;
             if (basePlate != null)
@@ -216,6 +234,12 @@ namespace CocinaBoliviana.Editor
 
         private static GameObject CreateKnifePrefab()
         {
+            // Si el prefab ya existe se devuelve tal cual: reconstruirlo desde cero borraba
+            // los ajustes hechos a mano (ángulo del AttachPoint, colliders, etc.).
+            // Para forzar un rebuild, borra el archivo y vuelve a correr el setup.
+            var yaExiste = AssetDatabase.LoadAssetAtPath<GameObject>(KnifeToolPrefabPath);
+            if (yaExiste != null) return yaExiste;
+
             var baseKnife = AssetDatabase.LoadAssetAtPath<GameObject>(KnifePrefabPath);
             GameObject root;
             if (baseKnife != null)
@@ -471,18 +495,12 @@ namespace CocinaBoliviana.Editor
             }
 
             // E. Clean up old primitive knives and place interactive Knife_Tool
-            var oldKnives = GameObject.FindObjectsByType<GameObject>(FindObjectsInactive.Include);
-            foreach (var go in oldKnives)
-            {
-                if (go == null) continue; // el padre pudo destruir a este hijo en una vuelta previa
-                if (go.name == "Cuchillo" || go.name == "KnifeGRP" || go.name == "Knife_Tool")
-                {
-                    Undo.DestroyObjectImmediate(go);
-                }
-            }
+            // Antes esto borraba todo objeto llamado "Cuchillo"/"KnifeGRP"/"Knife_Tool" para
+            // migrar de los cuchillos primitivos viejos. Esa migración ya está hecha, y
+            // mantenerla significaba destruir cualquier cuchillo puesto a mano. Fuera.
 
-            // Place Knife_Tool right on the cutting station table next to cutting board
-            if (knifePrefab != null)
+            // Cuchillo: solo se coloca si NO hay ninguno. Si ya está, se respeta dónde lo dejaste.
+            if (knifePrefab != null && GameObject.Find("Knife_Tool") == null)
             {
                 GameObject cuttingStation = GameObject.Find("CuttingStation_01");
                 Vector3 knifePos = new Vector3(-0.65f, 0.98f, 2.35f);
@@ -498,8 +516,8 @@ namespace CocinaBoliviana.Editor
                 Debug.Log($"[KitchenMechanicsSetup] Placed interactive Knife_Tool at {knifePos}");
             }
 
-            // F. Place a ready clean plate on the assembly counter
-            if (platePrefab != null)
+            // F. Plato limpio en la mesa de armado, con la misma regla.
+            if (platePrefab != null && GameObject.Find("Plate_Item") == null)
             {
                 GameObject assemblyStation = GameObject.Find("AssemblyStation");
                 Vector3 platePos = new Vector3(-0.6f, 0.98f, 0f);
