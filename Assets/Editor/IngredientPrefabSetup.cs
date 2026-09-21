@@ -108,7 +108,7 @@ namespace CocinaBoliviana.Editor
 
             ClearLegacyCuttingBoardRefs();
 
-            Debug.Log("[IngredientPrefabSetup] Listo. Revisa en el Inspector el tamaño de cada SphereCollider (es una estimación) y ajústalo si el agarre se siente raro.");
+            Debug.Log("[IngredientPrefabSetup] Listo. Los colliders se ajustan solos a la malla de cada ingrediente.");
         }
 
         private static GameObject EnsureIngredientPrefab(string prefabPath, IngredientData data, bool isCut)
@@ -124,18 +124,37 @@ namespace CocinaBoliviana.Editor
             {
                 GameObject root = editScope.prefabContentsRoot;
 
-                float scale = root.transform.localScale.x != 0 ? Mathf.Abs(root.transform.localScale.x) : 1f;
-                float localRadius = DesiredWorldColliderRadius / scale;
+                // Caja ajustada a la malla, no esfera. Una esfera RUEDA por definición: los
+                // ingredientes no paraban quietos al soltarlos. Además el radio de antes era
+                // un valor fijo estimado, igual para una papa que para un grano de arroz.
+                var esferaVieja = root.GetComponent<SphereCollider>();
+                if (esferaVieja != null) Object.DestroyImmediate(esferaVieja, true);
 
-                var collider = root.GetComponent<SphereCollider>();
-                if (collider == null) collider = root.AddComponent<SphereCollider>();
-                collider.radius = localRadius;
-                collider.center = Vector3.zero;
+                var collider = root.GetComponent<BoxCollider>();
+                if (collider == null) collider = root.AddComponent<BoxCollider>();
+
+                if (TryGetLocalBounds(root, out Vector3 centro, out Vector3 tamano))
+                {
+                    collider.center = centro;
+                    collider.size = tamano;
+                }
+                else
+                {
+                    Debug.LogWarning($"[IngredientPrefabSetup] {prefabPath} no tiene Renderer; " +
+                                     "se le deja un collider por defecto.");
+                    float scale = root.transform.localScale.x != 0 ? Mathf.Abs(root.transform.localScale.x) : 1f;
+                    collider.size = Vector3.one * (DesiredWorldColliderRadius * 2f / scale);
+                    collider.center = Vector3.zero;
+                }
+                collider.sharedMaterial = EnsurePhysicsMaterial();
 
                 var rb = root.GetComponent<Rigidbody>();
                 if (rb == null) rb = root.AddComponent<Rigidbody>();
                 rb.mass = 0.3f;
-                rb.angularDamping = 0.05f;
+                // El 0.05 de antes era casi nulo y los dejaba girando eternamente.
+                rb.angularDamping = 6f;
+                rb.linearDamping = 0.6f;
+                rb.interpolation = RigidbodyInterpolation.Interpolate;
 
                 if (root.GetComponent<XRGrabInteractable>() == null)
                 {
@@ -160,6 +179,59 @@ namespace CocinaBoliviana.Editor
         /// TomatePicado_Item.prefab ya borrado, y hoy el corte se resuelve vía
         /// IngredientData.cortesDisponibles.
         /// </summary>
+        private const string PhysicsMaterialPath = "Assets/Materials/Fisica_Ingrediente.physicsMaterial";
+
+        /// <summary>
+        /// Mucha fricción y cero rebote: sin esto los ingredientes patinan y botan por el
+        /// mostrador en vez de quedarse donde los sueltas.
+        /// </summary>
+        private static PhysicsMaterial EnsurePhysicsMaterial()
+        {
+            var mat = AssetDatabase.LoadAssetAtPath<PhysicsMaterial>(PhysicsMaterialPath);
+            if (mat == null)
+            {
+                mat = new PhysicsMaterial("Fisica_Ingrediente");
+                AssetDatabase.CreateAsset(mat, PhysicsMaterialPath);
+                Debug.Log($"[IngredientPrefabSetup] Material de física creado en {PhysicsMaterialPath}");
+            }
+
+            mat.dynamicFriction = 0.85f;
+            mat.staticFriction = 0.95f;
+            mat.bounciness = 0f;
+            mat.frictionCombine = PhysicsMaterialCombine.Maximum;
+            mat.bounceCombine = PhysicsMaterialCombine.Minimum;
+            EditorUtility.SetDirty(mat);
+            return mat;
+        }
+
+        /// <summary>
+        /// Caja que envuelve a todos los Renderer del prefab, expresada en el espacio local
+        /// de la raíz. Así cada ingrediente lleva un collider de su tamaño real en vez de
+        /// uno estimado igual para todos.
+        /// </summary>
+        private static bool TryGetLocalBounds(GameObject root, out Vector3 centro, out Vector3 tamano)
+        {
+            centro = Vector3.zero;
+            tamano = Vector3.one;
+
+            var renderers = root.GetComponentsInChildren<Renderer>(true);
+            if (renderers.Length == 0) return false;
+
+            Bounds mundo = renderers[0].bounds;
+            for (int i = 1; i < renderers.Length; i++)
+            {
+                mundo.Encapsulate(renderers[i].bounds);
+            }
+
+            Vector3 lossy = root.transform.lossyScale;
+            centro = root.transform.InverseTransformPoint(mundo.center);
+            tamano = new Vector3(
+                mundo.size.x / Mathf.Max(Mathf.Abs(lossy.x), 0.0001f),
+                mundo.size.y / Mathf.Max(Mathf.Abs(lossy.y), 0.0001f),
+                mundo.size.z / Mathf.Max(Mathf.Abs(lossy.z), 0.0001f));
+            return true;
+        }
+
         private static void ClearLegacyCuttingBoardRefs()
         {
             Scene scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);

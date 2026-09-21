@@ -249,6 +249,11 @@ namespace CocinaBoliviana
                         cutItem.SetData(sourceData);
                     }
                     cutItem.SetCorteActual(tipoDeCorte);
+
+                    // Clavado donde quedo, para que no ruede ni lo empujen al pasar. No se
+                    // registra como contenido de la tabla: asi queda libre para el siguiente
+                    // ingrediente sin tener que retirar este primero.
+                    cutItem.FijarEnSitio();
                 }
 
                 // El resultado queda suelto, apoyado en la superficie sólida de la tabla.
@@ -268,7 +273,11 @@ namespace CocinaBoliviana
         {
             if (currentIngredient == null) yield break;
             Transform target = currentIngredient.transform;
-            Vector3 originalScale = target.localScale;
+
+            // La escala buena, no la que tenga ahora mismo: si un golpe interrumpe la
+            // animacion anterior a medio aplastar, ese valor deformado se convertia en el
+            // "original" del siguiente y el ingrediente crecia golpe a golpe.
+            Vector3 originalScale = currentIngredient.EscalaLocalObjetivo;
             Vector3 squishedScale = new Vector3(originalScale.x * 1.18f, originalScale.y * 0.72f, originalScale.z * 1.18f);
 
             float elapsed = 0f;

@@ -20,3 +20,6 @@ MonoBehaviour:
   cortesDisponibles:
   - tipo: 2
     prefabResultado: {fileID: 5635535193595545919, guid: 969c331f50cf525f3968c7854a6d1725, type: 3}
+  metodosCoccion: 01000000
+  tiempoCoccion: 9
+  margenAntesDeQuemarse: 5

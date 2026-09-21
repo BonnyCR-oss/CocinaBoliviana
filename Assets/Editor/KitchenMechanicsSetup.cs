@@ -516,8 +516,54 @@ namespace CocinaBoliviana.Editor
                 Debug.Log($"[KitchenMechanicsSetup] Placed interactive Knife_Tool at {knifePos}");
             }
 
-            // F. Plato limpio en la mesa de armado, con la misma regla.
-            if (platePrefab != null && GameObject.Find("Plate_Item") == null)
+            // Sitio fijo del cuchillo, junto a la tabla, para que no se pierda al soltarlo.
+            // Va aparte del bloque de arriba para que también alcance a un cuchillo que ya
+            // estuviera puesto a mano.
+            GameObject knife = GameObject.Find("Knife_Tool");
+            GameObject station01 = GameObject.Find("CuttingStation_01");
+            if (knife != null && station01 != null)
+            {
+                Transform sitio = station01.transform.Find("KnifeHome");
+                if (sitio == null)
+                {
+                    var sitioGo = new GameObject("KnifeHome");
+                    sitioGo.transform.SetParent(station01.transform, true);
+                    // Al lado de la tabla, sobre el mostrador. Solo se coloca al crearlo:
+                    // si lo mueves en el Inspector, el cuchillo volverá a donde tú digas.
+                    sitioGo.transform.position = station01.transform.position + new Vector3(0.35f, 0.48f, 0f);
+                    sitioGo.transform.rotation = Quaternion.Euler(0f, 90f, 0f);
+                    sitio = sitioGo.transform;
+                }
+
+                var home = knife.GetComponent<ToolHome>();
+                if (home == null) home = knife.AddComponent<ToolHome>();
+
+                var soHome = new SerializedObject(home);
+                soHome.FindProperty("sitio").objectReferenceValue = sitio;
+                soHome.ApplyModifiedPropertiesWithoutUndo();
+
+                Debug.Log("[KitchenMechanicsSetup] Cuchillo con sitio fijo en 'KnifeHome' junto a la tabla.");
+            }
+
+            // F. Un solo plato en la mesa de armado.
+            // Antes se colocaba uno en CADA corrida y se acumulaban duplicados apilados,
+            // peleandose por el mismo rayo del control. Se deja el primero y se borra el resto.
+            var platos = new System.Collections.Generic.List<GameObject>();
+            foreach (var go in GameObject.FindObjectsByType<GameObject>(FindObjectsInactive.Include))
+            {
+                if (go != null && go.name == "Plate_Item") platos.Add(go);
+            }
+            for (int i = 1; i < platos.Count; i++)
+            {
+                Undo.DestroyObjectImmediate(platos[i]);
+            }
+            if (platos.Count > 1)
+            {
+                Debug.Log($"[KitchenMechanicsSetup] Habia {platos.Count} Plate_Item apilados; " +
+                          "se dejo uno y se borraron los demas.");
+            }
+
+            if (platePrefab != null && platos.Count == 0)
             {
                 GameObject assemblyStation = GameObject.Find("AssemblyStation");
                 Vector3 platePos = new Vector3(-0.6f, 0.98f, 0f);

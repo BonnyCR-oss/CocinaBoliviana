@@ -33,14 +33,23 @@ namespace CocinaBoliviana.Editor
             // 3. Menús flotantes: necesitan el ItemDispenser que agrega el paso 1.
             Run("DispenserMenuSetup", DispenserMenuSetup.SetupAll);
 
-            // 4. Manos en los controles (prefabs, independiente).
+            // 4. Emplatado: cartel de receta en el plato y prefabs de platos servidos.
+            //    Va ANTES de GrabFeelSetup, que es quien les aplica el agarre imán a todos
+            //    los prefabs agarrables, incluidos los platos servidos que esto crea.
+            Run("PlatingSetup", PlatingSetup.SetupPlating);
+
+            // 5. Manos en los controles (prefabs, independiente).
             Run("HandVisualsSetup", HandVisualsSetup.SetupHandVisuals);
 
-            // 5. Agarre tipo imán. Toca los prefabs agarrables de los pasos 1 y 2.
+            // 6. Agarre tipo imán. Toca los prefabs agarrables de los pasos 1 y 2.
             Run("GrabFeelSetup", GrabFeelSetup.SetupGrabFeel);
 
-            // 6. Fuego de las hornallas.
+            // 7. Fuego de las hornallas.
             Run("FlameSetup", FlameSetup.SetupFlames);
+
+            // 8. Cocción. Después del fuego, que es quien crea los BurnerFlame que
+            //    la olla y el sartén enganchan para encenderlos al cocinar.
+            Run("CookingSetup", CookingSetup.SetupCooking);
 
             Debug.Log("[KitchenBootstrap] Mecánica aplicada.");
         }
