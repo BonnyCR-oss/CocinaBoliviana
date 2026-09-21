@@ -7,9 +7,9 @@ using CocinaBoliviana.Data;
 namespace CocinaBoliviana
 {
     /// <summary>
-    /// Menú flotante (World Space Canvas) que muestra un botón por cada IngredientData
-    /// recibido y avisa cuál eligió el jugador. No sabe nada de dispensadores: solo
-    /// muestra opciones y reporta la elección.
+    /// Menú flotante (World Space Canvas) que muestra un botón por cada opción recibida
+    /// y avisa cuál eligió el jugador. No sabe nada de dispensadores ni de tablas de cortar:
+    /// solo muestra opciones y reporta la elección.
     /// </summary>
     public class IngredientSelectorMenu : MonoBehaviour
     {
@@ -28,7 +28,17 @@ namespace CocinaBoliviana
             if (panelRoot != null) panelRoot.SetActive(false);
         }
 
+        /// <summary>Atajo para el caso más común: un botón por ingrediente.</summary>
         public void Show(IReadOnlyList<IngredientData> opciones, Action<IngredientData> onSelected)
+        {
+            Show(opciones, ingrediente => ingrediente.nombre, onSelected);
+        }
+
+        /// <summary>
+        /// Versión genérica: sirve para cualquier lista (ingredientes de un dispensador,
+        /// tipos de corte de una tabla, etc.). 'etiqueta' decide qué texto lleva cada botón.
+        /// </summary>
+        public void Show<T>(IReadOnlyList<T> opciones, Func<T, string> etiqueta, Action<T> onSelected)
         {
             if (buttonTemplate == null || panelRoot == null || buttonContainer == null)
             {
@@ -38,19 +48,19 @@ namespace CocinaBoliviana
 
             Clear();
 
-            foreach (var ingrediente in opciones)
+            foreach (var opcion in opciones)
             {
-                if (ingrediente == null) continue;
+                if (opcion is null) continue;
 
                 GameObject buttonGo = Instantiate(buttonTemplate.gameObject, buttonContainer);
                 buttonGo.SetActive(true);
                 spawnedButtons.Add(buttonGo);
 
                 var label = buttonGo.GetComponentInChildren<Text>();
-                if (label != null) label.text = ingrediente.nombre;
+                if (label != null) label.text = (etiqueta != null) ? etiqueta(opcion) : opcion.ToString();
 
                 var button = buttonGo.GetComponent<Button>();
-                IngredientData capturado = ingrediente;
+                T capturado = opcion;
                 button.onClick.AddListener(() =>
                 {
                     onSelected?.Invoke(capturado);

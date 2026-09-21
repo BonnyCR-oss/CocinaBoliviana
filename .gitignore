@@ -112,3 +112,19 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# Pack Yughues Free Flooring Materials: 121 MB de los que la escena solo usa
+# M_YFFlM_06 (~10 MB). El resto se queda en local para no inflar el historial.
+# Si necesitas otro material del pack, quita su linea de aqui y commitealo.
+/Assets/YughuesFreeFlooringMaterials/**
+!/Assets/YughuesFreeFlooringMaterials/
+!/Assets/YughuesFreeFlooringMaterials/*.meta
+# Los .unitypackage estan ignorados, asi que sus .meta quedarian huerfanos.
+/Assets/YughuesFreeFlooringMaterials/*.unitypackage.meta
+!/Assets/YughuesFreeFlooringMaterials/Materials/
+!/Assets/YughuesFreeFlooringMaterials/Materials.meta
+!/Assets/YughuesFreeFlooringMaterials/Materials/M_YFFlM_06.mat
+!/Assets/YughuesFreeFlooringMaterials/Materials/M_YFFlM_06.mat.meta
+!/Assets/YughuesFreeFlooringMaterials/Textures/
+!/Assets/YughuesFreeFlooringMaterials/Textures.meta
+!/Assets/YughuesFreeFlooringMaterials/Textures/T_YFFlM_06_*

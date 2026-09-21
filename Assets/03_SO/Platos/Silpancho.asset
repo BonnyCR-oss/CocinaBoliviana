@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Silpancho
   m_EditorClassIdentifier: Assembly-CSharp::CocinaBoliviana.Data.DishData
   nombre: Silpancho
-  icono: {fileID: 0}
+  icono: {fileID: 21300000, guid: 28c614268d2ec82d8b7edd18114f8338, type: 3}
   platoPrefab: {fileID: -6540145201173266139, guid: 926cf68523ef4e504badff1780e6994d, type: 3}
   ingredientesRequeridos:
   - {fileID: 11400000, guid: 45dfd7abe0b0f0484b1eded2b6205b6c, type: 2}

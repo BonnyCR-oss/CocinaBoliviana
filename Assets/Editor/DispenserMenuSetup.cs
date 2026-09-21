@@ -12,27 +12,25 @@ namespace CocinaBoliviana.Editor
     /// <summary>
     /// Construye el prefab de menú flotante (IngredientSelectorMenu), asegura que "First Scene"
     /// tenga la infraestructura de UI para VR (EventSystem + raycasters, copiada de "Main Menu"),
-    /// y deja "Cajon_Tomate" configurado como ejemplo de dispensador con selección múltiple
-    /// (Tomate / Cebolla / Papa).
+    /// deja los tres cajones de la despensa (Papas / Carne / Verduras) configurados como
+    /// dispensadores con selección múltiple, y conecta un menú de tipo de corte en cada tabla.
     /// </summary>
-    [InitializeOnLoad]
     public static class DispenserMenuSetup
     {
         private const string FirstScenePath = "Assets/Scenes/First Scene.unity";
         private const string MainMenuScenePath = "Assets/Scenes/Main Menu.unity";
         private const string MenuPrefabPath = "Assets/02_Prefabs/UI/IngredientSelectorMenu.prefab";
 
-        static DispenserMenuSetup()
-        {
-            EditorApplication.delayCall += () =>
-            {
-                if (!SessionState.GetBool("DispenserMenuSetup_Executed_v1", false))
-                {
-                    SessionState.SetBool("DispenserMenuSetup_Executed_v1", true);
-                    SetupAll();
-                }
-            };
-        }
+        /// <summary>Altura del menú sobre el cajón, en metros.</summary>
+        private const float AlturaMenuCajon = 0.35f;
+
+        /// <summary>
+        /// Altura del menú sobre la tabla, en metros. Más alto que el de los cajones a
+        /// propósito: el trigger de detección de la tabla llega a 30 cm y, como ItemDispenser
+        /// pone Physics.queriesHitTriggers = true, el rayo del control chocaría con él antes
+        /// de alcanzar el panel.
+        /// </summary>
+        private const float AlturaMenuTabla = 0.45f;
 
         [MenuItem("Kitchen/Setup Ingredient Selector Menu")]
         public static void SetupAll()
@@ -54,12 +52,13 @@ namespace CocinaBoliviana.Editor
             }
 
             EnsureEventSystem(scene);
-            SetupDemoDispenser(menuPrefab);
+            SetupDispensers(menuPrefab);
+            SetupCuttingBoardMenus(menuPrefab);
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
 
-            Debug.Log("[DispenserMenuSetup] Listo. 'Cajon_Tomate' ahora abre un menú con Tomate/Cebolla/Papa al presionar Grip o Trigger.");
+            Debug.Log("[DispenserMenuSetup] Listo. Cajones con menú de ingredientes, tablas con menú de corte.");
         }
 
         private static GameObject BuildMenuPrefabIfNeeded()
@@ -176,60 +175,125 @@ namespace CocinaBoliviana.Editor
             EditorSceneManager.SetActiveScene(targetScene);
         }
 
-        private static void SetupDemoDispenser(GameObject menuPrefab)
+        /// <summary>
+        /// Qué ingredientes ofrece cada cajón. El reparto sigue el nombre del cajón, no el campo
+        /// 'tipo' del IngredientData: ahí Papa, Tomate, Cebolla y Huevo están los cuatro marcados
+        /// como Verdura, así que agrupar por tipo no distingue nada.
+        /// </summary>
+        private static readonly (string crate, string[] ingredientes)[] Reparto =
         {
-            GameObject cajonTomate = GameObject.Find("Cajon_Tomate");
-            if (cajonTomate == null)
+            ("Cajon_Papas",    new[] { "Papa", "Arroz" }),
+            ("Cajon_Carne",    new[] { "Carne", "Huevo" }),
+            ("Cajon_Verduras", new[] { "Tomate", "Cebolla" }),
+        };
+
+        private static void SetupDispensers(GameObject menuPrefab)
+        {
+            foreach (var (crateName, nombresIngredientes) in Reparto)
             {
-                Debug.LogWarning("[DispenserMenuSetup] No se encontró 'Cajon_Tomate' en la escena.");
+                GameObject crate = GameObject.Find(crateName);
+                if (crate == null)
+                {
+                    Debug.LogWarning($"[DispenserMenuSetup] No se encontró '{crateName}' en la escena.");
+                    continue;
+                }
+
+                var dispenser = crate.GetComponent<ItemDispenser>();
+                if (dispenser == null)
+                {
+                    Debug.LogWarning($"[DispenserMenuSetup] '{crateName}' no tiene ItemDispenser. " +
+                                     "¿Corriste antes 'Kitchen > Setup Kitchen Mechanics'?");
+                    continue;
+                }
+
+                GameObject menuInstance = AttachMenu(crate, menuPrefab, AlturaMenuCajon);
+
+                var so = new SerializedObject(dispenser);
+                so.FindProperty("menu").objectReferenceValue = menuInstance.GetComponent<IngredientSelectorMenu>();
+
+                SerializedProperty opcionesProp = so.FindProperty("opcionesIngredientes");
+                opcionesProp.ClearArray();
+                int i = 0;
+                foreach (string nombre in nombresIngredientes)
+                {
+                    string assetPath = $"Assets/03_SO/Ingredientes/{nombre}.asset";
+                    var ingrediente = AssetDatabase.LoadAssetAtPath<IngredientData>(assetPath);
+                    if (ingrediente == null)
+                    {
+                        Debug.LogWarning($"[DispenserMenuSetup] No existe {assetPath}, se omite en '{crateName}'.");
+                        continue;
+                    }
+                    if (ingrediente.prefab == null)
+                    {
+                        // Sin esto el menú abre pero no dispensa nada: ItemDispenser spawnea
+                        // IngredientData.prefab, no el prefab del dispensador.
+                        Debug.LogWarning($"[DispenserMenuSetup] '{nombre}' no tiene 'prefab' asignado en su " +
+                                         "IngredientData; el menú lo mostrará pero no dispensará nada.");
+                    }
+
+                    opcionesProp.InsertArrayElementAtIndex(i);
+                    opcionesProp.GetArrayElementAtIndex(i).objectReferenceValue = ingrediente;
+                    i++;
+                }
+
+                so.ApplyModifiedPropertiesWithoutUndo();
+                Debug.Log($"[DispenserMenuSetup] '{crateName}' ofrece: {string.Join(", ", nombresIngredientes)}.");
+            }
+        }
+
+        /// <summary>
+        /// Cada tabla de cortar lleva su propio menú para elegir el tipo de corte al acoplar
+        /// un ingrediente con más de un corte posible (ej. Cebolla: Rodajas o Cubitos).
+        /// </summary>
+        private static void SetupCuttingBoardMenus(GameObject menuPrefab)
+        {
+            var boards = Object.FindObjectsByType<CuttingBoard>(FindObjectsInactive.Include);
+            if (boards.Length == 0)
+            {
+                Debug.LogWarning("[DispenserMenuSetup] No hay ninguna CuttingBoard en la escena.");
                 return;
             }
 
-            var dispenser = cajonTomate.GetComponent<ItemDispenser>();
-            if (dispenser == null)
+            foreach (var board in boards)
             {
-                Debug.LogWarning("[DispenserMenuSetup] 'Cajon_Tomate' no tiene ItemDispenser.");
-                return;
+                GameObject menuInstance = AttachMenu(board.gameObject, menuPrefab, AlturaMenuTabla);
+
+                var so = new SerializedObject(board);
+                so.FindProperty("corteMenu").objectReferenceValue = menuInstance.GetComponent<IngredientSelectorMenu>();
+                so.ApplyModifiedPropertiesWithoutUndo();
+
+                Debug.Log($"[DispenserMenuSetup] Menú de corte conectado en '{board.gameObject.name}'.");
+            }
+        }
+
+        /// <summary>
+        /// Cuelga (o reutiliza) la instancia del menú sobre el cajón, compensando la escala.
+        /// </summary>
+        private static GameObject AttachMenu(GameObject host, GameObject menuPrefab, float alturaEnMetros)
+        {
+            Transform existingMenu = host.transform.Find("IngredientSelectorMenu");
+            if (existingMenu != null)
+            {
+                // Ya está puesto: se respeta dónde lo dejaste. Recolocarlo en cada corrida
+                // borraba los ajustes hechos a mano en la escena.
+                return existingMenu.gameObject;
             }
 
-            Transform existingMenu = cajonTomate.transform.Find("IngredientSelectorMenu");
-            GameObject menuInstance = existingMenu != null
-                ? existingMenu.gameObject
-                : (GameObject)PrefabUtility.InstantiatePrefab(menuPrefab, cajonTomate.transform);
+            var menuInstance = (GameObject)PrefabUtility.InstantiatePrefab(menuPrefab, host.transform);
 
-            // El padre (Cajon_Tomate) tiene escala NO uniforme (ej. 0.36/0.16/0.55).
-            // Si no se compensa, el menú hereda esa distorsión y queda microscópico/deforme.
+            // Tanto los cajones (0.36 / 0.16 / 0.55) como las tablas (0.45 / 0.02 / 0.35)
+            // tienen escala NO uniforme. Sin compensarla el menú hereda esa distorsión
+            // y queda microscópico y deforme.
             const float targetWorldScale = 0.001f;
-            const float targetWorldHeightOffset = 0.35f;
-            Vector3 parentLossy = cajonTomate.transform.lossyScale;
+            Vector3 parentLossy = host.transform.lossyScale;
             menuInstance.transform.localScale = new Vector3(
                 targetWorldScale / Mathf.Max(parentLossy.x, 0.0001f),
                 targetWorldScale / Mathf.Max(parentLossy.y, 0.0001f),
                 targetWorldScale / Mathf.Max(parentLossy.z, 0.0001f));
-            menuInstance.transform.localPosition = new Vector3(0f, targetWorldHeightOffset / Mathf.Max(parentLossy.y, 0.0001f), 0f);
+            menuInstance.transform.localPosition = new Vector3(0f, alturaEnMetros / Mathf.Max(parentLossy.y, 0.0001f), 0f);
             menuInstance.transform.localRotation = Quaternion.identity;
 
-            var tomate = AssetDatabase.LoadAssetAtPath<IngredientData>("Assets/03_SO/Ingredientes/Tomate.asset");
-            var cebolla = AssetDatabase.LoadAssetAtPath<IngredientData>("Assets/03_SO/Ingredientes/Cebolla.asset");
-            var papa = AssetDatabase.LoadAssetAtPath<IngredientData>("Assets/03_SO/Ingredientes/Papa.asset");
-
-            var so = new SerializedObject(dispenser);
-            SerializedProperty menuProp = so.FindProperty("menu");
-            SerializedProperty opcionesProp = so.FindProperty("opcionesIngredientes");
-
-            menuProp.objectReferenceValue = menuInstance.GetComponent<IngredientSelectorMenu>();
-
-            opcionesProp.ClearArray();
-            int i = 0;
-            foreach (var ingrediente in new[] { tomate, cebolla, papa })
-            {
-                if (ingrediente == null) continue;
-                opcionesProp.InsertArrayElementAtIndex(i);
-                opcionesProp.GetArrayElementAtIndex(i).objectReferenceValue = ingrediente;
-                i++;
-            }
-
-            so.ApplyModifiedPropertiesWithoutUndo();
+            return menuInstance;
         }
     }
 }

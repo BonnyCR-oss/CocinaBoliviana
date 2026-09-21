@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Arroz
   m_EditorClassIdentifier: Assembly-CSharp::CocinaBoliviana.Data.IngredientData
   nombre: Arroz
-  tipo: 4
+  tipo: 3
   prefab: {fileID: 523671262105038929, guid: 7dd2997ff82357f22861dd9dc2006839, type: 3}
   sePuedeCortar: 0
   sePuedeCocinar: 1

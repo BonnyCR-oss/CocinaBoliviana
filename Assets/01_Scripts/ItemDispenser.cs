@@ -14,15 +14,13 @@ namespace CocinaBoliviana
     public class ItemDispenser : XRSimpleInteractable
     {
         [Header("Dispenser Configuration")]
-        [SerializeField] private GameObject itemPrefab;
-
-        [Tooltip("Opcional: si este dispensador reparte un IngredientData, referenciarlo aquí " +
-                 "permite usar el selector por categoría en el Inspector (botón 'Ingredient Picker').")]
+        [Tooltip("Solo para el selector por categoría del Inspector. No se dispensa: lo que sale " +
+                 "de este dispensador son las 'Opciones Ingredientes'.")]
         [SerializeField] private IngredientData ingredienteReferencia;
 
-        [Header("Selección Múltiple (opcional)")]
-        [Tooltip("Si tiene 1 o más elementos, al interactuar se abre un menú para elegir cuál dispensar " +
-                 "en vez de dispensar 'Item Prefab' directamente.")]
+        [Header("Qué dispensa")]
+        [Tooltip("Única fuente de lo que reparte este dispensador. Con un solo elemento lo entrega " +
+                 "directo; con dos o más abre el menú para elegir (requiere 'Menu').")]
         [SerializeField] private List<IngredientData> opcionesIngredientes = new List<IngredientData>();
         [SerializeField] private IngredientSelectorMenu menu;
 
@@ -243,13 +241,12 @@ namespace CocinaBoliviana
 
         public void DispenseToInteractor(IXRSelectInteractor interactor, Transform fallbackTransform = null)
         {
-            Debug.Log($"[ItemDispenser] {gameObject.name}: DispenseToInteractor llamado. tieneMenu={opcionesIngredientes != null && opcionesIngredientes.Count > 0}, itemPrefab={(itemPrefab != null ? itemPrefab.name : "null")}, menu={(menu != null ? menu.name : "null")}.");
+            int totalOpciones = (opcionesIngredientes != null) ? opcionesIngredientes.Count : 0;
+            Debug.Log($"[ItemDispenser] {gameObject.name}: DispenseToInteractor llamado. opciones={totalOpciones}, menu={(menu != null ? menu.name : "null")}.");
 
-            bool tieneMenu = opcionesIngredientes != null && opcionesIngredientes.Count > 0;
-
-            if (!tieneMenu && itemPrefab == null)
+            if (totalOpciones == 0)
             {
-                Debug.LogWarning($"[ItemDispenser] {gameObject.name} does not have an itemPrefab assigned!");
+                Debug.LogWarning($"[ItemDispenser] {gameObject.name} no tiene ningún ingrediente en 'Opciones Ingredientes'.");
                 return;
             }
 
@@ -271,21 +268,24 @@ namespace CocinaBoliviana
 
             Transform handTransform = ResolveHandTransform(interactor, fallbackTransform);
 
-            if (tieneMenu)
+            // Con una sola opción no hay nada que elegir: se entrega directo y nos ahorramos
+            // un menú de un solo botón (es el caso de CleanPlates).
+            if (totalOpciones == 1)
             {
-                if (menu == null)
-                {
-                    Debug.LogWarning($"[ItemDispenser] {gameObject.name} tiene opciones configuradas pero no tiene un 'menu' (IngredientSelectorMenu) asignado.");
-                    return;
-                }
-
                 lastDispenseTime = Time.time;
-                menu.Show(opcionesIngredientes, elegido => SpawnItem(elegido != null ? elegido.prefab : null, interactor, handTransform));
+                IngredientData unico = opcionesIngredientes[0];
+                SpawnItem(unico != null ? unico.prefab : null, interactor, handTransform);
+                return;
+            }
+
+            if (menu == null)
+            {
+                Debug.LogWarning($"[ItemDispenser] {gameObject.name} tiene {totalOpciones} opciones pero no tiene un 'menu' (IngredientSelectorMenu) asignado.");
                 return;
             }
 
             lastDispenseTime = Time.time;
-            SpawnItem(itemPrefab, interactor, handTransform);
+            menu.Show(opcionesIngredientes, elegido => SpawnItem(elegido != null ? elegido.prefab : null, interactor, handTransform));
         }
 
         private Transform ResolveHandTransform(IXRSelectInteractor interactor, Transform fallbackTransform)

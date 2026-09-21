@@ -7,23 +7,12 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using CocinaBoliviana.Data;
 
 namespace CocinaBoliviana.Editor
 {
-    [InitializeOnLoad]
     public static class KitchenMechanicsSetup
     {
-        static KitchenMechanicsSetup()
-        {
-            EditorApplication.delayCall += () =>
-            {
-                if (!SessionState.GetBool("KitchenMechanics_AutoConfig_Run_v1", false))
-                {
-                    SessionState.SetBool("KitchenMechanics_AutoConfig_Run_v1", true);
-                    SetupFirstSceneMechanics();
-                }
-            };
-        }
         private const string ScenePath = "Assets/Scenes/First Scene.unity";
         private const string PrefabsFolder = "Assets/02_Prefabs";
         private const string TomatoGlbPath = "Assets/04_Models/IngredientesModel/tomate.glb";
@@ -35,6 +24,9 @@ namespace CocinaBoliviana.Editor
         private const string TomatePicadoPrefabPath = "Assets/02_Prefabs/TomatePicado_Item.prefab";
         private const string PlateItemPrefabPath = "Assets/02_Prefabs/Plate_Item.prefab";
         private const string KnifeToolPrefabPath = "Assets/02_Prefabs/Knife_Tool.prefab";
+
+        /// <summary>Cajones de la despensa, tal como se llaman en la escena.</summary>
+        internal static readonly string[] CrateNames = { "Cajon_Papas", "Cajon_Carne", "Cajon_Verduras" };
 
         [MenuItem("Kitchen/Setup Kitchen Mechanics (First Scene)")]
         public static void SetupFirstSceneMechanics()
@@ -74,7 +66,8 @@ namespace CocinaBoliviana.Editor
             rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
             var grab = root.AddComponent<XRGrabInteractable>();
-            grab.movementType = XRBaseInteractable.MovementType.VelocityTracking;
+            // El 'movementType' y el resto del tacto del agarre los fija GrabFeelSetup
+            // (paso 7 del bootstrap); no se tocan aquí para no pelearse por el mismo campo.
             grab.throwOnDetach = true;
 
             var item = root.AddComponent<IngredientItem>();
@@ -114,7 +107,8 @@ namespace CocinaBoliviana.Editor
             rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
             var grab = root.AddComponent<XRGrabInteractable>();
-            grab.movementType = XRBaseInteractable.MovementType.VelocityTracking;
+            // El 'movementType' y el resto del tacto del agarre los fija GrabFeelSetup
+            // (paso 7 del bootstrap); no se tocan aquí para no pelearse por el mismo campo.
             grab.throwOnDetach = true;
 
             var item = root.AddComponent<IngredientItem>();
@@ -178,8 +172,28 @@ namespace CocinaBoliviana.Editor
 
             var grab = root.GetComponent<XRGrabInteractable>();
             if (grab == null) grab = root.AddComponent<XRGrabInteractable>();
-            grab.movementType = XRBaseInteractable.MovementType.VelocityTracking;
+            // El 'movementType' y el resto del tacto del agarre los fija GrabFeelSetup
+            // (paso 7 del bootstrap); no se tocan aquí para no pelearse por el mismo campo.
             grab.throwOnDetach = true;
+
+            // Un plato se lleva horizontal aunque gires la muñeca: sigue la posición de la
+            // mano pero NO su rotación. Sin esto el plato se inclina con el control y la
+            // comida encima queda de canto.
+            grab.trackRotation = false;
+
+            // Se agarra por el centro de la base, como un mozo llevando la bandeja. El pivote
+            // del prefab está en la base del disco, así que el attach va en el origen.
+            Transform plateAttach = root.transform.Find("AttachPoint");
+            if (plateAttach == null)
+            {
+                var attachGo = new GameObject("AttachPoint");
+                attachGo.transform.SetParent(root.transform, false);
+                plateAttach = attachGo.transform;
+            }
+            plateAttach.localPosition = Vector3.zero;
+            plateAttach.localRotation = Quaternion.identity;
+            plateAttach.localScale = Vector3.one;
+            grab.attachTransform = plateAttach;
 
             Transform foodSnap = root.transform.Find("FoodSnapPoint");
             if (foodSnap == null)
@@ -229,7 +243,8 @@ namespace CocinaBoliviana.Editor
 
             var grab = root.GetComponent<XRGrabInteractable>();
             if (grab == null) grab = root.AddComponent<XRGrabInteractable>();
-            grab.movementType = XRBaseInteractable.MovementType.VelocityTracking;
+            // El 'movementType' y el resto del tacto del agarre los fija GrabFeelSetup
+            // (paso 7 del bootstrap); no se tocan aquí para no pelearse por el mismo campo.
             grab.throwOnDetach = true;
 
             Transform bladeTrigger = root.transform.Find("Blade_Trigger");
@@ -249,6 +264,25 @@ namespace CocinaBoliviana.Editor
 
             var chopper = bladeTrigger.GetComponent<KnifeChopper>();
             if (chopper == null) chopper = bladeTrigger.gameObject.AddComponent<KnifeChopper>();
+
+            // Punto de agarre. Sin esto XRI alinea el PIVOTE RAÍZ del cuchillo con la mano, y
+            // como el mango va hacia +Z y la hoja hacia -Z, el filo terminaba apuntando al
+            // jugador. XRI hace coincidir el forward (+Z) de este transform con el forward del
+            // attach del control, así que se gira 180° en Y para que lo que salga de la mano
+            // sea la hoja y no el mango.
+            // Si el ángulo no convence, este es el transform a mover: 'AttachPoint' dentro de
+            // Assets/02_Prefabs/Knife_Tool.prefab.
+            Transform attach = root.transform.Find("AttachPoint");
+            if (attach == null)
+            {
+                var attachGo = new GameObject("AttachPoint");
+                attachGo.transform.SetParent(root.transform, false);
+                attach = attachGo.transform;
+            }
+            attach.localPosition = new Vector3(0f, 0f, 0.08f); // centro del mango
+            attach.localRotation = Quaternion.Euler(0f, 180f, 0f);
+            attach.localScale = Vector3.one;
+            grab.attachTransform = attach;
 
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, KnifeToolPrefabPath);
             UnityEngine.Object.DestroyImmediate(root);
@@ -278,7 +312,10 @@ namespace CocinaBoliviana.Editor
                 Debug.Log("[KitchenMechanicsSetup] Created XR Interaction Manager in scene.");
             }
 
-            // B. Cajon_Tomate Setup (was Cajon_Carne)
+            // B. Cajones de la despensa: cada uno lleva su propio ItemDispenser.
+            // La geometría de la escena los trae sin collider, así que aquí se les pone uno sólido
+            // (no trigger) para que el rayo del control los golpee de forma fiable.
+            // La lista de ingredientes de cada cajón la llena DispenserMenuSetup.
             GameObject pantry = GameObject.Find("Pantry");
             if (pantry != null)
             {
@@ -286,27 +323,23 @@ namespace CocinaBoliviana.Editor
                 if (pCol != null) pCol.enabled = false;
             }
 
-            GameObject cajonTomate = GameObject.Find("Cajon_Carne");
-            if (cajonTomate != null)
+            foreach (string crateName in CrateNames)
             {
-                cajonTomate.name = "Cajon_Tomate";
-            }
-            else
-            {
-                cajonTomate = GameObject.Find("Cajon_Tomate");
-            }
+                GameObject crate = GameObject.Find(crateName);
+                if (crate == null)
+                {
+                    Debug.LogWarning($"[KitchenMechanicsSetup] '{crateName}' no está en la escena.");
+                    continue;
+                }
 
-            if (cajonTomate != null)
-            {
-                var col = cajonTomate.GetComponent<BoxCollider>();
-                if (col == null) col = cajonTomate.AddComponent<BoxCollider>();
+                var col = crate.GetComponent<BoxCollider>();
+                if (col == null) col = crate.AddComponent<BoxCollider>();
                 col.size = new Vector3(1.2f, 1.2f, 1.5f);
                 col.center = new Vector3(0f, 0f, 0.25f);
                 col.isTrigger = false; // Solid collider so rays hit it reliably!
 
-                var dispenser = cajonTomate.GetComponent<ItemDispenser>();
-                if (dispenser == null) dispenser = cajonTomate.AddComponent<ItemDispenser>();
-                SetPrivateField(dispenser, "itemPrefab", tomatoPrefab);
+                var dispenser = crate.GetComponent<ItemDispenser>();
+                if (dispenser == null) dispenser = crate.AddComponent<ItemDispenser>();
                 SetPrivateField(dispenser, "cooldownTime", 0.35f);
 
                 if (!dispenser.colliders.Contains(col))
@@ -314,11 +347,7 @@ namespace CocinaBoliviana.Editor
                     dispenser.colliders.Add(col);
                 }
 
-                Debug.Log("[KitchenMechanicsSetup] Configured Cajon_Tomate dispenser with solid ray-interactive collider.");
-            }
-            else
-            {
-                Debug.LogWarning("[KitchenMechanicsSetup] Cajon_Tomate not found in scene!");
+                Debug.Log($"[KitchenMechanicsSetup] '{crateName}': collider sólido + ItemDispenser listos.");
             }
 
             // C. CleanPlates Setup
@@ -333,7 +362,36 @@ namespace CocinaBoliviana.Editor
 
                 var dispenser = cleanPlates.GetComponent<ItemDispenser>();
                 if (dispenser == null) dispenser = cleanPlates.AddComponent<ItemDispenser>();
-                SetPrivateField(dispenser, "itemPrefab", platePrefab);
+
+                // ItemDispenser ya no acepta un prefab suelto: todo sale de la lista de
+                // IngredientData. El plato no es un ingrediente, así que lleva su propio
+                // asset de tipo 'Otro'. Con un solo elemento se entrega directo, sin menú.
+                // Con trackRotation desactivado el plato conserva para siempre la rotación
+                // con la que nació, e ItemDispenser usa la del control si no hay spawnPoint.
+                // Este punto fijo lo hace nacer nivelado.
+                Vector3 cpLossy = cleanPlates.transform.lossyScale;
+                Transform plateSpawn = cleanPlates.transform.Find("PlateSpawnPoint");
+                if (plateSpawn == null)
+                {
+                    var spawnGo = new GameObject("PlateSpawnPoint");
+                    spawnGo.transform.SetParent(cleanPlates.transform, false);
+                    plateSpawn = spawnGo.transform;
+                }
+                plateSpawn.localPosition = new Vector3(0f, 0.15f / Mathf.Max(Mathf.Abs(cpLossy.y), 0.0001f), 0f);
+                plateSpawn.rotation = Quaternion.identity; // nivelado en mundo, pase lo que pase con el padre
+                SetPrivateField(dispenser, "spawnPoint", plateSpawn);
+
+                IngredientData platoData = EnsurePlatoData(platePrefab);
+                var soDispenser = new SerializedObject(dispenser);
+                SerializedProperty opciones = soDispenser.FindProperty("opcionesIngredientes");
+                opciones.ClearArray();
+                if (platoData != null)
+                {
+                    opciones.InsertArrayElementAtIndex(0);
+                    opciones.GetArrayElementAtIndex(0).objectReferenceValue = platoData;
+                }
+                soDispenser.ApplyModifiedPropertiesWithoutUndo();
+
                 SetPrivateField(dispenser, "cooldownTime", 0.35f);
 
                 if (!dispenser.colliders.Contains(col))
@@ -349,7 +407,7 @@ namespace CocinaBoliviana.Editor
             }
 
             // D. Cutting Stations & Cutting Boards
-            string[] cuttingStationNames = { "CuttingStation_01", "CuttingStation_02" };
+            string[] cuttingStationNames = { "CuttingStation_01" };
             foreach (var stationName in cuttingStationNames)
             {
                 GameObject station = GameObject.Find(stationName);
@@ -358,19 +416,44 @@ namespace CocinaBoliviana.Editor
                     Transform tabla = station.transform.Find("Tabla");
                     GameObject boardGo = (tabla != null) ? tabla.gameObject : station;
 
+                    // La Tabla tiene escala (0.45, 0.02, 0.35). Definir colliders en espacio
+                    // LOCAL los deja deformados: los 0.4 de alto de antes eran 8 mm reales.
+                    // Todo se declara en metros de mundo y se convierte.
+                    Vector3 lossy = boardGo.transform.lossyScale;
+                    Vector3 AMundo(Vector3 metros) => new Vector3(
+                        metros.x / Mathf.Max(Mathf.Abs(lossy.x), 0.0001f),
+                        metros.y / Mathf.Max(Mathf.Abs(lossy.y), 0.0001f),
+                        metros.z / Mathf.Max(Mathf.Abs(lossy.z), 0.0001f));
+
+                    // Collider SÓLIDO: es la superficie donde se apoyan los ingredientes.
+                    // La Tabla viene de la escena sin collider, así que hay que ponérselo o
+                    // todo la atraviesa y queda hundido sobre la Mesa. La detección NO usa
+                    // este collider: va por OverlapBox dentro de CuttingBoard.
                     var col = boardGo.GetComponent<BoxCollider>();
                     if (col == null) col = boardGo.AddComponent<BoxCollider>();
-                    col.size = new Vector3(1.2f, 0.4f, 1.2f);
-                    col.center = new Vector3(0f, 0.15f, 0f);
-                    col.isTrigger = true; // Trigger for detecting ingredients dropped on board
+                    col.size = AMundo(new Vector3(0.45f, 0.02f, 0.35f));
+                    col.center = Vector3.zero;
+                    col.isTrigger = false;
 
+                    // Resto de un intento anterior: la superficie sólida ahora es el propio
+                    // collider de la Tabla, así que este hijo sobra.
+                    Transform legacySurface = boardGo.transform.Find("SolidSurface");
+                    if (legacySurface != null) Undo.DestroyObjectImmediate(legacySurface.gameObject);
+
+                    // Solo se coloca al crearlo. Si ya existe se respeta dónde esté, para no
+                    // pisar un ajuste hecho a mano en el Inspector.
                     Transform snap = boardGo.transform.Find("SnapPoint");
                     if (snap == null)
                     {
                         var snapGo = new GameObject("SnapPoint");
                         snapGo.transform.SetParent(boardGo.transform, false);
-                        snapGo.transform.localPosition = new Vector3(0f, 0.04f, 0f);
                         snap = snapGo.transform;
+
+                        // Los ingredientes tienen un SphereCollider de ~6 cm de radio y la
+                        // tabla 2 cm de grosor, así que el centro va 7 cm sobre el centro de
+                        // la tabla para que se apoyen encima en vez de quedar incrustados.
+                        snap.localPosition = AMundo(new Vector3(0f, 0.07f, 0f));
+                        snap.localRotation = Quaternion.identity;
                     }
 
                     var board = boardGo.GetComponent<CuttingBoard>();
@@ -378,6 +461,10 @@ namespace CocinaBoliviana.Editor
                     SetPrivateField(board, "snapPoint", snap);
                     SetPrivateField(board, "defaultCutPrefab", tomatePicadoPrefab);
                     SetPrivateField(board, "requiredHits", 3);
+                    // Zona de detección en metros de mundo: 30 cm de alto para que un
+                    // ingrediente que cae no la atraviese entre frames.
+                    SetPrivateField(board, "zonaDeteccion", new Vector3(0.50f, 0.30f, 0.40f));
+                    SetPrivateField(board, "zonaAltura", 0.15f);
 
                     Debug.Log($"[KitchenMechanicsSetup] Configured CuttingBoard on {boardGo.name} in {stationName}");
                 }
@@ -387,6 +474,7 @@ namespace CocinaBoliviana.Editor
             var oldKnives = GameObject.FindObjectsByType<GameObject>(FindObjectsInactive.Include);
             foreach (var go in oldKnives)
             {
+                if (go == null) continue; // el padre pudo destruir a este hijo en una vuelta previa
                 if (go.name == "Cuchillo" || go.name == "KnifeGRP" || go.name == "Knife_Tool")
                 {
                     Undo.DestroyObjectImmediate(go);
@@ -430,6 +518,33 @@ namespace CocinaBoliviana.Editor
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
             Debug.Log($"[KitchenMechanicsSetup] Saved {ScenePath} successfully. Scene is now active and ready!");
+        }
+
+        /// <summary>
+        /// El dispensador de platos necesita un IngredientData porque ItemDispenser solo reparte
+        /// desde esa lista. El plato no es comida, así que va como IngredientType.Otro.
+        /// </summary>
+        private static IngredientData EnsurePlatoData(GameObject platePrefab)
+        {
+            const string platoPath = "Assets/03_SO/Ingredientes/Plato.asset";
+
+            var plato = AssetDatabase.LoadAssetAtPath<IngredientData>(platoPath);
+            if (plato == null)
+            {
+                plato = ScriptableObject.CreateInstance<IngredientData>();
+                AssetDatabase.CreateAsset(plato, platoPath);
+                Debug.Log($"[KitchenMechanicsSetup] Creado {platoPath} para el dispensador de platos.");
+            }
+
+            plato.nombre = "Plato";
+            plato.tipo = IngredientType.Otro;
+            plato.sePuedeCortar = false;
+            plato.sePuedeCocinar = false;
+            if (platePrefab != null) plato.prefab = platePrefab;
+
+            EditorUtility.SetDirty(plato);
+            AssetDatabase.SaveAssets();
+            return plato;
         }
 
         private static void SetPrivateField(object target, string fieldName, object value)

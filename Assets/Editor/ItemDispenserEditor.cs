@@ -8,8 +8,8 @@ namespace CocinaBoliviana.Editor
 {
     /// <summary>
     /// Inspector personalizado para ItemDispenser: permite elegir primero una categoría
-    /// (Verdura, Carne, etc.) y luego, filtrado por esa categoría, el IngredientData exacto
-    /// a dispensar. Al elegir uno, autocompleta "itemPrefab" con su prefab.
+    /// (Verdura, Carne, etc.) y luego, filtrado por esa categoría, el IngredientData exacto,
+    /// para agregarlo a la lista de opciones que reparte el dispensador.
     /// </summary>
     [CustomEditor(typeof(ItemDispenser))]
     public class ItemDispenserEditor : UnityEditor.Editor
@@ -21,7 +21,6 @@ namespace CocinaBoliviana.Editor
             serializedObject.Update();
 
             SerializedProperty ingredienteProp = serializedObject.FindProperty("ingredienteReferencia");
-            SerializedProperty itemPrefabProp = serializedObject.FindProperty("itemPrefab");
 
             var ingredienteActual = ingredienteProp.objectReferenceValue as IngredientData;
             if (ingredienteActual != null)
@@ -57,16 +56,11 @@ namespace CocinaBoliviana.Editor
                 if (indiceElegido != indiceActual)
                 {
                     ingredienteProp.objectReferenceValue = seleccionActual;
-                    itemPrefabProp.objectReferenceValue = seleccionActual.prefab;
                 }
             }
 
             EditorGUILayout.Space();
-            EditorGUILayout.PropertyField(itemPrefabProp, new GUIContent("Item Prefab (resultado)"));
-            EditorGUILayout.HelpBox("El selector de arriba autocompleta este campo para dispensadores de UN solo ingrediente. Si este dispensador NO es de un ingrediente (ej. platos limpios), ignora el selector y arrastra el prefab aquí directamente.", MessageType.None);
-
-            EditorGUILayout.Space();
-            EditorGUILayout.LabelField("Selección Múltiple (menú al interactuar)", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Qué dispensa", EditorStyles.boldLabel);
 
             SerializedProperty opcionesProp = serializedObject.FindProperty("opcionesIngredientes");
             SerializedProperty menuProp = serializedObject.FindProperty("menu");
@@ -111,9 +105,17 @@ namespace CocinaBoliviana.Editor
                 }
             }
 
-            if (opcionesProp.arraySize > 0)
+            if (opcionesProp.arraySize == 0)
             {
-                EditorGUILayout.HelpBox("Con la lista llena, este dispensador ignora 'Item Prefab' y abre el menú para elegir entre estas opciones.", MessageType.Info);
+                EditorGUILayout.HelpBox("La lista está vacía: este dispensador no reparte nada. Agrega al menos un ingrediente.", MessageType.Warning);
+            }
+            else if (opcionesProp.arraySize == 1)
+            {
+                EditorGUILayout.HelpBox("Con una sola opción se entrega directo, sin abrir menú. 'Menu' puede quedar vacío.", MessageType.Info);
+            }
+            else
+            {
+                EditorGUILayout.HelpBox("Con dos o más opciones se abre el menú para elegir, así que 'Menu' es obligatorio.", MessageType.Info);
             }
 
             EditorGUILayout.Space();

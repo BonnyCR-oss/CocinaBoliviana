@@ -8,7 +8,6 @@ namespace CocinaBoliviana.Editor
     /// button/grip input untouched (ControllerAnimator still drives the hidden controller
     /// transforms; only the rendered mesh changes).
     /// </summary>
-    [InitializeOnLoad]
     public static class HandVisualsSetup
     {
         private const string LeftControllerPrefabPath = "Assets/Samples/XR Interaction Toolkit/3.5.1/Starter Assets/Prefabs/Controllers/XR Controller Left.prefab";
@@ -20,18 +19,6 @@ namespace CocinaBoliviana.Editor
         // Si tras correr el setup la mano mira hacia una dirección rara, ajusta este offset
         // y vuelve a correr "Kitchen > Setup Hand Visuals (Controllers)".
         private static readonly Vector3 HandRotationOffsetEuler = new Vector3(0f, 180f, 0f);
-
-        static HandVisualsSetup()
-        {
-            EditorApplication.delayCall += () =>
-            {
-                if (!SessionState.GetBool("HandVisualsSetup_Executed_v1", false))
-                {
-                    SessionState.SetBool("HandVisualsSetup_Executed_v1", true);
-                    SetupHandVisuals();
-                }
-            };
-        }
 
         [MenuItem("Kitchen/Setup Hand Visuals (Controllers)")]
         public static void SetupHandVisuals()
