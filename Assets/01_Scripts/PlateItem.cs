@@ -6,8 +6,12 @@ using CocinaBoliviana.Data;
 
 namespace CocinaBoliviana
 {
+    /// <summary>
+    /// El plato de emplatado. NO se agarra: es una estacion fija donde se monta el plato.
+    /// Lo unico que el jugador levanta es el plato terminado, que aparece en el punto de
+    /// recogida. Por eso no lleva XRGrabInteractable.
+    /// </summary>
     [RequireComponent(typeof(Rigidbody))]
-    [RequireComponent(typeof(XRGrabInteractable))]
     public class PlateItem : MonoBehaviour
     {
         [Header("Plate Settings")]
@@ -19,6 +23,14 @@ namespace CocinaBoliviana
                  "todos los DishData del proyecto.")]
         [SerializeField] private List<DishData> recetasConocidas = new List<DishData>();
         [SerializeField] private PlateCounter contador;
+
+        [Header("Reposición")]
+        [Tooltip("Prefab del plato vacío. Al completarse una receta aparece uno nuevo en " +
+                 "este mismo sitio, para seguir emplatando sin ir al dispensador.")]
+        [SerializeField] private GameObject platoVacioPrefab;
+
+        [Tooltip("Desactívalo si prefieres obligar a sacar cada plato de CleanPlates.")]
+        [SerializeField] private bool reponerAlCompletar = true;
 
         [Header("Disposición")]
         [Tooltip("Radio máximo, en metros, del círculo donde se reparte la comida.")]
@@ -244,7 +256,14 @@ namespace CocinaBoliviana
 
             foreach (var item in platedIngredients)
             {
-                if (item != null) Destroy(item.gameObject);
+                if (item == null) continue;
+
+                // Desactivar ANTES de destruir. Destroy() no surte efecto hasta el final del
+                // frame, asi que los colliders siguen vivos y el plato nuevo que se crea aqui
+                // mismo los detectaba con su trigger: el plato limpio aparecia con la comida
+                // del anterior.
+                item.gameObject.SetActive(false);
+                Destroy(item.gameObject);
             }
             platedIngredients.Clear();
 
@@ -280,6 +299,19 @@ namespace CocinaBoliviana
             }
 
             Debug.Log($"[PlateItem] ¡{plato.nombre} terminado! Te espera en el punto de recogida.");
+
+            // Deja uno limpio en su sitio para poder seguir emplatando sin tener que ir
+            // al dispensador cada vez.
+            if (reponerAlCompletar && platoVacioPrefab != null)
+            {
+                GameObject nuevo = Instantiate(platoVacioPrefab, transform.position, transform.rotation);
+                nuevo.name = "Plate_Item";
+            }
+            else if (reponerAlCompletar)
+            {
+                Debug.LogWarning("[PlateItem] 'platoVacioPrefab' sin asignar; no se repone el plato. " +
+                                 "Corre 'Kitchen > Setup Plating'.");
+            }
 
             // El plato de emplatado ya cumplió: ahora el plato servido ocupa su lugar.
             Destroy(gameObject);

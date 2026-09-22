@@ -50,10 +50,24 @@ namespace CocinaBoliviana.Editor
                     return;
                 }
 
+                // El plato de emplatado es una estacion fija: se monta encima, no se lleva.
+                // Lo unico agarrable es el plato terminado del punto de recogida.
+                var grabViejo = root.GetComponent<XRGrabInteractable>();
+                if (grabViejo != null)
+                {
+                    Object.DestroyImmediate(grabViejo, true);
+                    Debug.Log("[PlatingSetup] Quitado el XRGrabInteractable del plato de emplatado.");
+                }
+
                 PlateCounter counter = ConstruirCartelSiFalta(root);
 
                 var so = new SerializedObject(plate);
                 so.FindProperty("contador").objectReferenceValue = counter;
+
+                // El plato se repone a si mismo: el prefab se referencia desde dentro del
+                // propio prefab, que es legal y evita tener que buscarlo en runtime.
+                so.FindProperty("platoVacioPrefab").objectReferenceValue =
+                    AssetDatabase.LoadAssetAtPath<GameObject>(PlatePrefabPath);
 
                 SerializedProperty lista = so.FindProperty("recetasConocidas");
                 lista.ClearArray();

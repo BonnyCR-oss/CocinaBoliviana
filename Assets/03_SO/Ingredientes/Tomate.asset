@@ -19,4 +19,9 @@ MonoBehaviour:
   sePuedeCocinar: 0
   cortesDisponibles:
   - tipo: 2
+    prefabResultado: {fileID: 2109757562465275352, guid: 996ddeb3fd36184408e53a12f36a8dd8, type: 3}
+  - tipo: 1
     prefabResultado: {fileID: 453608409702637079, guid: 92493907456fb417da78f727a9c10ef6, type: 3}
+  metodosCoccion: 
+  tiempoCoccion: 8
+  margenAntesDeQuemarse: 6

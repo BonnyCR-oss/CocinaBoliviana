@@ -374,56 +374,26 @@ namespace CocinaBoliviana.Editor
                 Debug.Log($"[KitchenMechanicsSetup] '{crateName}': collider sólido + ItemDispenser listos.");
             }
 
-            // C. CleanPlates Setup
+            // C. CleanPlates: solo decoracion.
+            // Ya NO reparte platos. El diseno es que haya UN unico plato de emplatado: al
+            // completarse una receta, el plato servido se va al punto de recogida y
+            // PlateItem deja uno limpio en su sitio. Un dispensador aqui llenaba la cocina
+            // de platos vacios y encima le robaba el rayo al plato bueno, porque estan
+            // practicamente en el mismo punto.
             GameObject cleanPlates = GameObject.Find("CleanPlates");
             if (cleanPlates != null)
             {
-                var col = cleanPlates.GetComponent<BoxCollider>();
-                if (col == null) col = cleanPlates.AddComponent<BoxCollider>();
-                col.size = new Vector3(1.2f, 15f, 1.2f);
-                col.center = new Vector3(0f, 7.5f, 0f);
-                col.isTrigger = false; // Solid collider so rays hit it reliably!
-
-                var dispenser = cleanPlates.GetComponent<ItemDispenser>();
-                if (dispenser == null) dispenser = cleanPlates.AddComponent<ItemDispenser>();
-
-                // ItemDispenser ya no acepta un prefab suelto: todo sale de la lista de
-                // IngredientData. El plato no es un ingrediente, así que lleva su propio
-                // asset de tipo 'Otro'. Con un solo elemento se entrega directo, sin menú.
-                // Con trackRotation desactivado el plato conserva para siempre la rotación
-                // con la que nació, e ItemDispenser usa la del control si no hay spawnPoint.
-                // Este punto fijo lo hace nacer nivelado.
-                Vector3 cpLossy = cleanPlates.transform.lossyScale;
-                Transform plateSpawn = cleanPlates.transform.Find("PlateSpawnPoint");
-                if (plateSpawn == null)
+                var dispensadorViejo = cleanPlates.GetComponent<ItemDispenser>();
+                if (dispensadorViejo != null)
                 {
-                    var spawnGo = new GameObject("PlateSpawnPoint");
-                    spawnGo.transform.SetParent(cleanPlates.transform, false);
-                    plateSpawn = spawnGo.transform;
-                }
-                plateSpawn.localPosition = new Vector3(0f, 0.15f / Mathf.Max(Mathf.Abs(cpLossy.y), 0.0001f), 0f);
-                plateSpawn.rotation = Quaternion.identity; // nivelado en mundo, pase lo que pase con el padre
-                SetPrivateField(dispenser, "spawnPoint", plateSpawn);
-
-                IngredientData platoData = EnsurePlatoData(platePrefab);
-                var soDispenser = new SerializedObject(dispenser);
-                SerializedProperty opciones = soDispenser.FindProperty("opcionesIngredientes");
-                opciones.ClearArray();
-                if (platoData != null)
-                {
-                    opciones.InsertArrayElementAtIndex(0);
-                    opciones.GetArrayElementAtIndex(0).objectReferenceValue = platoData;
-                }
-                soDispenser.ApplyModifiedPropertiesWithoutUndo();
-
-                SetPrivateField(dispenser, "cooldownTime", 0.35f);
-
-                if (!dispenser.colliders.Contains(col))
-                {
-                    dispenser.colliders.Add(col);
+                    Undo.DestroyObjectImmediate(dispensadorViejo);
+                    Debug.Log("[KitchenMechanicsSetup] Quitado el ItemDispenser de 'CleanPlates': " +
+                              "el plato de emplatado se repone solo.");
                 }
 
-                Debug.Log("[KitchenMechanicsSetup] Configured CleanPlates dispenser with solid ray-interactive collider.");
+                // Sin collider tampoco intercepta el rayo del control.
+                var colViejo = cleanPlates.GetComponent<BoxCollider>();
+                if (colViejo != null) Undo.DestroyObjectImmediate(colViejo);
             }
             else
             {
@@ -582,33 +552,6 @@ namespace CocinaBoliviana.Editor
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
             Debug.Log($"[KitchenMechanicsSetup] Saved {ScenePath} successfully. Scene is now active and ready!");
-        }
-
-        /// <summary>
-        /// El dispensador de platos necesita un IngredientData porque ItemDispenser solo reparte
-        /// desde esa lista. El plato no es comida, así que va como IngredientType.Otro.
-        /// </summary>
-        private static IngredientData EnsurePlatoData(GameObject platePrefab)
-        {
-            const string platoPath = "Assets/03_SO/Ingredientes/Plato.asset";
-
-            var plato = AssetDatabase.LoadAssetAtPath<IngredientData>(platoPath);
-            if (plato == null)
-            {
-                plato = ScriptableObject.CreateInstance<IngredientData>();
-                AssetDatabase.CreateAsset(plato, platoPath);
-                Debug.Log($"[KitchenMechanicsSetup] Creado {platoPath} para el dispensador de platos.");
-            }
-
-            plato.nombre = "Plato";
-            plato.tipo = IngredientType.Otro;
-            plato.sePuedeCortar = false;
-            plato.sePuedeCocinar = false;
-            if (platePrefab != null) plato.prefab = platePrefab;
-
-            EditorUtility.SetDirty(plato);
-            AssetDatabase.SaveAssets();
-            return plato;
         }
 
         private static void SetPrivateField(object target, string fieldName, object value)

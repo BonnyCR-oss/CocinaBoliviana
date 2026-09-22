@@ -106,6 +106,8 @@ namespace CocinaBoliviana.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
+            MarcarCortesDeclarados();
+
             ClearLegacyCuttingBoardRefs();
 
             Debug.Log("[IngredientPrefabSetup] Listo. Los colliders se ajustan solos a la malla de cada ingrediente.");
@@ -230,6 +232,36 @@ namespace CocinaBoliviana.Editor
                 mundo.size.y / Mathf.Max(Mathf.Abs(lossy.y), 0.0001f),
                 mundo.size.z / Mathf.Max(Mathf.Abs(lossy.z), 0.0001f));
             return true;
+        }
+
+        /// <summary>
+        /// Recorre TODOS los IngredientData y configura cada prefab que aparezca en su
+        /// 'cortesDisponibles' como resultado de corte.
+        ///
+        /// Antes solo se configuraba lo que estuviera en la lista fija 'specs', asi que un
+        /// corte anadido a mano en el Inspector se quedaba con isCut = false. La tabla lo
+        /// veia como ingrediente crudo, lo volvia a acoplar y preguntaba otra vez por el
+        /// tipo de corte.
+        /// </summary>
+        private static void MarcarCortesDeclarados()
+        {
+            foreach (string guid in AssetDatabase.FindAssets("t:IngredientData"))
+            {
+                var data = AssetDatabase.LoadAssetAtPath<IngredientData>(AssetDatabase.GUIDToAssetPath(guid));
+                if (data == null || data.cortesDisponibles == null) continue;
+
+                foreach (var corte in data.cortesDisponibles)
+                {
+                    if (corte == null || corte.prefabResultado == null) continue;
+
+                    string ruta = AssetDatabase.GetAssetPath(corte.prefabResultado);
+                    if (string.IsNullOrEmpty(ruta)) continue;
+
+                    EnsureIngredientPrefab(ruta, data, isCut: true);
+                    Debug.Log($"[IngredientPrefabSetup] '{System.IO.Path.GetFileNameWithoutExtension(ruta)}' " +
+                              $"marcado como corte {corte.tipo} de {data.nombre}.");
+                }
+            }
         }
 
         private static void ClearLegacyCuttingBoardRefs()

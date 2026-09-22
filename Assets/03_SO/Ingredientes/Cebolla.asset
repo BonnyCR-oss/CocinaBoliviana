@@ -22,3 +22,6 @@ MonoBehaviour:
     prefabResultado: {fileID: 5549923284032271076, guid: bf6447bb826dff7c3a76ab6da236ada9, type: 3}
   - tipo: 2
     prefabResultado: {fileID: 2826291014205381082, guid: 77e18f8eea98477db90fdf15e8f0016c, type: 3}
+  metodosCoccion: 
+  tiempoCoccion: 8
+  margenAntesDeQuemarse: 6
