@@ -285,7 +285,8 @@ namespace CocinaBoliviana
             }
 
             lastDispenseTime = Time.time;
-            menu.Show(opcionesIngredientes, elegido => SpawnItem(elegido != null ? elegido.prefab : null, interactor, handTransform));
+            string tituloMenu = gameObject.name.Replace("Cajon_", "").Replace("_", " ");
+            menu.Show(opcionesIngredientes, elegido => SpawnItem(elegido != null ? elegido.prefab : null, interactor, handTransform), titulo: tituloMenu);
         }
 
         private Transform ResolveHandTransform(IXRSelectInteractor interactor, Transform fallbackTransform)

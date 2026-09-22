@@ -156,6 +156,12 @@ namespace CocinaBoliviana
                 tipoDeCorte = elegido.tipo;
                 esperandoEleccionDeCorte = false;
                 Debug.Log($"[CuttingBoard] Corte elegido para {ingredient.IngredientName}: {tipoDeCorte}.");
+            },
+            titulo: "Tipo de Corte",
+            onCancel: () =>
+            {
+                esperandoEleccionDeCorte = false;
+                Debug.Log($"[CuttingBoard] Menú de corte cerrado con X para {ingredient.IngredientName}.");
             });
         }
 
