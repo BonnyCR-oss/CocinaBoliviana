@@ -56,8 +56,9 @@ namespace CocinaBoliviana
 
         private readonly List<PedidoActivo> activos = new List<PedidoActivo>();
         private float proximoPedido;
+        private int puntosInternos;
 
-        public int Puntos { get; private set; }
+        public int Puntos => (LevelManager.Instance != null) ? LevelManager.Instance.Puntos : puntosInternos;
         public IReadOnlyList<PedidoActivo> Activos => activos;
 
         private static OrderManager cache;
@@ -74,12 +75,18 @@ namespace CocinaBoliviana
         {
             cache = this;
             proximoPedido = primerPedidoTrasSegundos;
+            puntosInternos = 0;
         }
 
         private void Update()
         {
-            ActualizarTiempos();
-            GenerarSiTocaOtro();
+            // Solo procesar cuenta atrás y generación de pedidos si el nivel está en curso
+            if (LevelManager.Instance == null || LevelManager.Instance.IsPlaying)
+            {
+                ActualizarTiempos();
+                GenerarSiTocaOtro();
+            }
+
             if (tablero != null) tablero.Refrescar(activos, Puntos);
         }
 
@@ -91,6 +98,12 @@ namespace CocinaBoliviana
                 if (activos[i].TiempoRestante > 0f) continue;
 
                 Debug.Log($"[OrderManager] Pedido caducado: {Describir(activos[i])}");
+
+                if (LevelManager.Instance != null)
+                {
+                    LevelManager.Instance.RegistrarPedidoPerdido(activos[i]);
+                }
+
                 activos.RemoveAt(i);
             }
         }
@@ -198,7 +211,15 @@ namespace CocinaBoliviana
 
                 if (pedido.Completo)
                 {
-                    Puntos += pedido.Recompensa;
+                    if (LevelManager.Instance != null)
+                    {
+                        LevelManager.Instance.RegistrarEntregaExitosa(pedido.Recompensa, plato);
+                    }
+                    else
+                    {
+                        puntosInternos += pedido.Recompensa;
+                    }
+
                     activos.Remove(pedido);
                     Debug.Log($"[OrderManager] Pedido completo. +{pedido.Recompensa} puntos (total {Puntos}).");
                 }

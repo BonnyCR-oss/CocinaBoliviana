@@ -39,7 +39,18 @@ namespace CocinaBoliviana
         {
             if (contenedor == null || plantillaTicket == null) return;
 
-            if (textoPuntos != null) textoPuntos.text = $"Puntos: {puntos}";
+            if (textoPuntos != null)
+            {
+                if (LevelManager.Instance != null)
+                {
+                    string rachaTxt = (LevelManager.Instance.RachaActual > 1) ? $"  (x{LevelManager.Instance.RachaActual}!)" : "";
+                    textoPuntos.text = $"Puntos: {puntos}{rachaTxt}";
+                }
+                else
+                {
+                    textoPuntos.text = $"Puntos: {puntos}";
+                }
+            }
             if (textoVacio != null) textoVacio.gameObject.SetActive(pedidos.Count == 0);
 
             // Solo se reconstruye cuando cambia el número de pedidos. Rehacerlo cada frame

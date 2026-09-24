@@ -31,5 +31,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: da37c04e5e709d7d2ab901859c7c7917, type: 2}
   - {fileID: 11400000, guid: 1893d54cffd80fa8b9d3529c8eea39b7, type: 2}
   - {fileID: 11400000, guid: 82272100148539be6965d91b1ac289a9, type: 2}
-  tiempoLimite: 45
+  tiempoLimite: 90
   puntos: 25

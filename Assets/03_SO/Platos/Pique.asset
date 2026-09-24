@@ -25,5 +25,5 @@ MonoBehaviour:
     debeEstarCocido: 1
     metodo: 1
   ingredientesRequeridos: []
-  tiempoLimite: 30
+  tiempoLimite: 80
   puntos: 30
