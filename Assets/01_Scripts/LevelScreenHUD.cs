@@ -5,7 +5,7 @@ using UnityEngine.UI;
 namespace CocinaBoliviana
 {
     /// <summary>
-    /// Interfaz de usuario en pantalla (Screen-Space Overlay) estilo Overcooked para el nivel.
+    /// Interfaz de usuario en pantalla (Screen-Space Overlay; World Space frente a la cabeza con visor) estilo Overcooked para el nivel.
     /// Muestra el banner inicial de cuenta regresiva, la barra superior con el temporizador digital,
     /// la puntuación, las estrellas de objetivo, el indicador de racha de combo y la pantalla final de resultados.
     /// </summary>
@@ -48,11 +48,20 @@ namespace CocinaBoliviana
         [SerializeField] private Color colorTiempoCritico = new Color(0.95f, 0.25f, 0.25f);
         [SerializeField] private Color colorRachaActiva = new Color(1.0f, 0.70f, 0.15f);
 
+        [Header("Visor VR")]
+        [Tooltip("Distancia (m) a la que se muestra el HUD frente a la cabeza cuando hay un visor activo.")]
+        [SerializeField] private float distanciaHUDVisor = 1.0f;
+        [Tooltip("Ancho (m) que ocupa el HUD en el visor.")]
+        [SerializeField] private float anchoHUDVisor = 1.1f;
+
         private Coroutine feedbackRoutine;
         private LevelManager lm;
+        private bool modoVisor;
 
         private void Start()
         {
+            ConfigurarParaVisor();
+
             lm = LevelManager.Instance;
             if (lm == null)
             {
@@ -99,6 +108,39 @@ namespace CocinaBoliviana
             if (lm.Estado == LevelState.Starting && textoCuentaAtras != null)
             {
                 textoCuentaAtras.text = "3";
+            }
+        }
+
+        /// <summary>
+        /// Un canvas Screen-Space Overlay no se dibuja dentro del visor (solo en la ventana de la PC).
+        /// Con un visor real activo se convierte a World Space y se cuelga frente a la cámara.
+        /// En el simulador no hay visor activo y se mantiene el overlay original.
+        /// </summary>
+        private void ConfigurarParaVisor()
+        {
+            var canvas = GetComponent<Canvas>();
+            var cam = Camera.main;
+            if (canvas == null || cam == null || !UnityEngine.XR.XRSettings.isDeviceActive) return;
+
+            modoVisor = true;
+
+            var rt = (RectTransform)transform;
+            var scaler = GetComponent<CanvasScaler>();
+            Vector2 resolucion = scaler != null ? scaler.referenceResolution : new Vector2(1920, 1080);
+
+            canvas.renderMode = RenderMode.WorldSpace;
+            canvas.worldCamera = cam;
+
+            rt.SetParent(cam.transform, false);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.sizeDelta = resolucion;
+            rt.localPosition = new Vector3(0f, 0f, distanciaHUDVisor);
+            rt.localRotation = Quaternion.identity;
+            rt.localScale = Vector3.one * (anchoHUDVisor / resolucion.x);
+
+            if (GetComponent<UnityEngine.XR.Interaction.Toolkit.UI.TrackedDeviceGraphicRaycaster>() == null)
+            {
+                gameObject.AddComponent<UnityEngine.XR.Interaction.Toolkit.UI.TrackedDeviceGraphicRaycaster>();
             }
         }
 
@@ -296,7 +338,13 @@ namespace CocinaBoliviana
 
             // Adaptar Canvas para que los mandos VR (ray interactor) puedan interactuar directamente
             var canvas = GetComponent<Canvas>();
-            if (canvas != null && Camera.main != null)
+            if (modoVisor)
+            {
+                // En el visor el HUD va pegado a la cabeza; al terminar se suelta para que
+                // el modal quede fijo en el mundo y sea fácil apuntarle con el rayo.
+                transform.SetParent(null, true);
+            }
+            else if (canvas != null && Camera.main != null)
             {
                 canvas.renderMode = RenderMode.ScreenSpaceCamera;
                 canvas.worldCamera = Camera.main;

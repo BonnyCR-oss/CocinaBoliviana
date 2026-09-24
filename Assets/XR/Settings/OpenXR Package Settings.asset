@@ -16,7 +16,7 @@ MonoBehaviour:
   nameUi: 'Android XR: AR Anchor'
   version: 0.1.0
   featureIdInternal: com.unity.openxr.feature.arfoundation-androidxr-anchor
-  openxrExtensionStrings: XR_ANDROID_trackables
+  openxrExtensionStrings: XR_ANDROID_trackables XR_ANDROID_device_anchor_persistence
   company: Unity Technologies
   priority: 0
   targetOpenXRApiVersion: 
@@ -381,8 +381,8 @@ MonoBehaviour:
   - {fileID: 5135180591691850454}
   - {fileID: 8273867116215504077}
   - {fileID: 2462552881200987464}
-  - {fileID: 1630477609840854423}
-  - {fileID: 3222692948063719589}
+  - {fileID: 8968727228298616820}
+  - {fileID: 6840830326565804654}
   - {fileID: -6004337283115602448}
   - {fileID: 7723304346184507740}
   - {fileID: -5911181457765140893}
@@ -393,7 +393,7 @@ MonoBehaviour:
   - {fileID: 137464251325118878}
   - {fileID: -3332887169578035766}
   - {fileID: 4730527843233203064}
-  - {fileID: 364367264419951775}
+  - {fileID: 9026250657767239480}
   - {fileID: 3353142269041186200}
   - {fileID: 1438116481082976342}
   - {fileID: 1985599259416268654}
@@ -534,7 +534,7 @@ MonoBehaviour:
   nameUi: 'Android XR: AR Anchor'
   version: 0.1.0
   featureIdInternal: com.unity.openxr.feature.arfoundation-androidxr-anchor
-  openxrExtensionStrings: XR_ANDROID_trackables
+  openxrExtensionStrings: XR_ANDROID_trackables XR_ANDROID_device_anchor_persistence
   company: Unity Technologies
   priority: 0
   targetOpenXRApiVersion: 
@@ -944,18 +944,8 @@ MonoBehaviour:
   features:
   - {fileID: -1215200647225297296}
   - {fileID: 7939053894861711510}
-  - {fileID: 6700821314418041443}
-  - {fileID: -5920695995511928972}
   - {fileID: -8878700621822116894}
-  - {fileID: 3313008659135552002}
-  - {fileID: 7847020513958364838}
-  - {fileID: -4208332362648154105}
   - {fileID: -2646499368415502112}
-  - {fileID: 8355561003221303303}
-  - {fileID: 3672091942529152940}
-  - {fileID: 8471553977381557142}
-  - {fileID: -6983464280995148112}
-  - {fileID: 4076376538424917836}
   - {fileID: 6745110126286222238}
   - {fileID: -4927156545026799390}
   - {fileID: 1476216951440746418}
