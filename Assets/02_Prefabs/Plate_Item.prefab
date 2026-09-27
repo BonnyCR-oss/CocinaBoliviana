@@ -181,8 +181,11 @@ MonoBehaviour:
   foodSnapPoint: {fileID: 300021}
   plateSound: {fileID: 0}
   recetasConocidas:
+  - {fileID: 11400000, guid: 1e52b21af1d80c744979d0a33270765c, type: 2}
   - {fileID: 11400000, guid: f34a678b0eb665948a79f9128c10b643, type: 2}
+  - {fileID: 11400000, guid: 0e42400674dda0c4a936abef42eec909, type: 2}
   - {fileID: 11400000, guid: 067a998a0d3578db5aaf13bdc233f576, type: 2}
+  - {fileID: 11400000, guid: bfba768725e28794b92dc6201866c2a8, type: 2}
   contador: {fileID: 9212562915634508864}
   platoVacioPrefab: {fileID: 300001}
   reponerAlCompletar: 1

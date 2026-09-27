@@ -10,14 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7d2c58d0cb128267e8f88cf868700a8b, type: 3}
-  m_Name: Plato
+  m_Name: Chorizo
   m_EditorClassIdentifier: Assembly-CSharp::CocinaBoliviana.Data.IngredientData
-  nombre: Plato
-  tipo: 5
-  prefab: {fileID: 300001, guid: 7a000003000000000000000000000003, type: 3}
-  sePuedeCortar: 0
-  sePuedeCocinar: 0
-  cortesDisponibles: []
-  metodosCoccion: 
-  tiempoCoccion: 8
-  margenAntesDeQuemarse: 6
+  nombre: Chorizo
+  tipo: 1
+  prefab: {fileID: 8710022706909844341, guid: 0d9c6a649b48d4c49867518d6b8180d1, type: 3}
+  sePuedeCortar: 1
+  sePuedeCocinar: 1
+  cortesDisponibles:
+  - tipo: 1
+    prefabResultado: {fileID: 6745861245739496755, guid: 3966ed3c1d3d50343bc1b5cd5630ba86, type: 3}
+  metodosCoccion: 01000000
+  tiempoCoccion: 5
+  margenAntesDeQuemarse: 5

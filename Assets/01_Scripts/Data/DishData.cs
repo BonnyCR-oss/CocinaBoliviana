@@ -27,7 +27,12 @@ namespace CocinaBoliviana.Data
 
             var detalles = new List<string>();
             if (corte != TipoCorte.Ninguno) detalles.Add(corte.ToString());
-            if (debeEstarCocido) detalles.Add(metodo == MetodoCoccion.Freir ? "Frito" : "Hervido");
+            if (debeEstarCocido)
+            {
+                detalles.Add(metodo == MetodoCoccion.Freir ? "Frito"
+                           : metodo == MetodoCoccion.Asar ? "Asado"
+                           : "Hervido");
+            }
 
             return (detalles.Count == 0) ? nombre : $"{nombre} ({string.Join(", ", detalles)})";
         }
@@ -79,6 +84,11 @@ namespace CocinaBoliviana.Data
             }
             return true;
         }
+
+        [Header("Refresco")]
+        [Tooltip("Color del líquido al servirse: tiñe el chorro y lo que se ve dentro del " +
+                 "vaso. Solo se usa en bebidas. DrinksSetup lo saca del material del modelo.")]
+        public Color colorLiquido = new Color(0.78f, 0.45f, 0.12f, 1f);
 
         [Header("Reglas")]
         public float tiempoLimite;

@@ -51,8 +51,12 @@ namespace CocinaBoliviana.Editor
             //    la olla y el sartén enganchan para encenderlos al cocinar.
             Run("CookingSetup", CookingSetup.SetupCooking);
 
-            // 9. Pedidos y entrega. Al final: necesita los platos servidos que prepara
-            //    PlatingSetup y la DeliveryStation ya construida en la escena.
+            // 9. Refrescos: vaso con liquido y dispensador. Antes de OrdersSetup, para que
+            //    el refresco del nivel ya exista cuando se generen los pedidos.
+            Run("DrinksSetup", DrinksSetup.SetupDrinks);
+
+            // 10. Pedidos y entrega. Al final: necesita los platos y refrescos ya
+            //     preparados por los pasos anteriores.
             Run("OrdersSetup", OrdersSetup.SetupOrders);
 
             Debug.Log("[KitchenBootstrap] Mecánica aplicada.");

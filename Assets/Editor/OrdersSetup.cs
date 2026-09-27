@@ -3,6 +3,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using TMPro;
 using CocinaBoliviana.Data;
 
 namespace CocinaBoliviana.Editor
@@ -90,15 +91,26 @@ namespace CocinaBoliviana.Editor
                       (campana == null ? " (sin Campana_Servicio, no habrá saltito)" : ""));
         }
 
+        // Paleta: carbón, ámbar de acento y papel crema para los tickets.
+        private static readonly Color ColorFondo = new Color(0.075f, 0.082f, 0.10f, 0.96f);
+        private static readonly Color ColorAcento = new Color(0.96f, 0.68f, 0.18f, 1f);
+        private static readonly Color ColorTicket = new Color(0.97f, 0.96f, 0.93f, 1f);
+        private static readonly Color ColorTinta = new Color(0.13f, 0.13f, 0.15f, 1f);
+
+        private const float AltoCabecera = 104f;
+        private const float AltoTicket = 200f;
+        private const float AltoFila = 62f;
+        private const float AltoBarra = 16f;
+        private const float AnchoFranja = 10f;
+
         /// <summary>
         /// Tablero en la pared oeste, encima de la entrega. Solo se coloca al crearlo:
         /// si lo mueves, se respeta.
         /// </summary>
         private static OrderBoard ConstruirTableroSiFalta(GameObject entrega)
         {
-            // Si ya hay uno, se comprueba que su plantilla sea la de esta version. Antes se
-            // respetaba a ciegas, asi que un tablero viejo nunca recibia las mejoras y habia
-            // que acordarse de borrarlo a mano.
+            // Si ya hay uno, se comprueba que sea de esta versión. Antes se respetaba a
+            // ciegas y un tablero viejo nunca recibía las mejoras.
             Vector3 posicionPrevia = Vector3.zero;
             Quaternion rotacionPrevia = Quaternion.identity;
             Vector3 escalaPrevia = Vector3.one;
@@ -107,14 +119,12 @@ namespace CocinaBoliviana.Editor
             var existente = Object.FindAnyObjectByType<OrderBoard>();
             if (existente != null)
             {
-                bool actualizado = existente.transform.Find("Version_3") != null;
-                if (actualizado)
+                if (existente.transform.Find("Version_4") != null)
                 {
                     Debug.Log("[OrdersSetup] Ya hay un tablero al día; se deja como está.");
                     return existente;
                 }
 
-                // Se conserva donde lo hayas puesto, solo se rehace su contenido.
                 habiaUno = true;
                 posicionPrevia = existente.transform.position;
                 rotacionPrevia = existente.transform.rotation;
@@ -126,13 +136,11 @@ namespace CocinaBoliviana.Editor
             var canvasGo = new GameObject("TableroDePedidos",
                 typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
             canvasGo.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
-            canvasGo.GetComponent<RectTransform>().sizeDelta = new Vector2(900, 700);
-            canvasGo.transform.localScale = Vector3.one * 0.0018f;
+            canvasGo.GetComponent<RectTransform>().sizeDelta = new Vector2(820, 900);
+            canvasGo.transform.localScale = Vector3.one * 0.0016f;
 
-            // Pegado a la pared oeste (x = -4.95), mirando al centro de la cocina.
-            // Y = -90, no 90: un canvas se lee cuando su forward (+Z) apunta AL CONTRARIO
-            // del observador. Con 90 el +Z va hacia +X, o sea hacia el jugador, y se ve
-            // la cara de atras: todo oscuro y el texto ilegible.
+            new GameObject("Version_4", typeof(RectTransform)).transform.SetParent(canvasGo.transform, false);
+
             if (habiaUno)
             {
                 canvasGo.transform.SetPositionAndRotation(posicionPrevia, rotacionPrevia);
@@ -144,45 +152,51 @@ namespace CocinaBoliviana.Editor
                 canvasGo.transform.rotation = Quaternion.Euler(0f, -90f, 0f);
             }
 
-            // Marcador de version: si falta, el setup sabe que el tablero es viejo y lo rehace.
-            new GameObject("Version_3", typeof(RectTransform)).transform.SetParent(canvasGo.transform, false);
-
-            var fondo = NuevoPanel(canvasGo.transform, "Fondo", new Color(0.09f, 0.09f, 0.11f, 0.92f));
+            var fondo = NuevoPanel(canvasGo.transform, "Fondo", ColorFondo, redondeado: true);
             Estirar(fondo.GetComponent<RectTransform>());
 
-            Text titulo = NuevoTexto(fondo.transform, "Titulo", "PEDIDOS", 54, TextAnchor.MiddleCenter);
+            // Cabecera ámbar: da jerarquía y separa el título de los tickets.
+            var cabecera = NuevoPanel(fondo.transform, "Cabecera", ColorAcento, redondeado: true);
+            AnclarArriba(cabecera.GetComponent<RectTransform>(), AltoCabecera, 0f, 0f);
+
+            var titulo = NuevoTexto(cabecera.transform, "Titulo", "PEDIDOS", 50, TextAlignmentOptions.Left);
+            titulo.color = new Color(0.12f, 0.08f, 0.02f);
+            titulo.fontStyle = FontStyles.Bold;
+            titulo.characterSpacing = 10f;
             var tRt = titulo.GetComponent<RectTransform>();
-            tRt.anchorMin = new Vector2(0f, 0.88f);
-            tRt.anchorMax = new Vector2(1f, 1f);
-            Margen(tRt, 20f);
+            Estirar(tRt);
+            tRt.offsetMin = new Vector2(34f, 0f);
+            tRt.offsetMax = new Vector2(-34f, 0f);
 
-            Text puntos = NuevoTexto(fondo.transform, "Puntos", "Puntos: 0", 38, TextAnchor.MiddleCenter);
-            puntos.color = new Color(1f, 0.85f, 0.4f);
+            var puntos = NuevoTexto(cabecera.transform, "Puntos", "0", 50, TextAlignmentOptions.Right);
+            puntos.color = new Color(0.12f, 0.08f, 0.02f);
+            puntos.fontStyle = FontStyles.Bold;
             var pRt = puntos.GetComponent<RectTransform>();
-            pRt.anchorMin = new Vector2(0f, 0.78f);
-            pRt.anchorMax = new Vector2(1f, 0.88f);
-            Margen(pRt, 20f);
+            Estirar(pRt);
+            pRt.offsetMin = new Vector2(34f, 0f);
+            pRt.offsetMax = new Vector2(-34f, 0f);
 
-            Text vacio = NuevoTexto(fondo.transform, "SinPedidos", "Sin pedidos", 34, TextAnchor.MiddleCenter);
-            vacio.color = new Color(0.6f, 0.6f, 0.6f);
+            var vacio = NuevoTexto(fondo.transform, "SinPedidos", "Sin pedidos", 32, TextAlignmentOptions.Center);
+            vacio.color = new Color(0.42f, 0.43f, 0.47f);
+            vacio.fontStyle = FontStyles.Italic;
             var vRt = vacio.GetComponent<RectTransform>();
-            vRt.anchorMin = new Vector2(0f, 0.35f);
-            vRt.anchorMax = new Vector2(1f, 0.5f);
+            vRt.anchorMin = new Vector2(0f, 0.40f);
+            vRt.anchorMax = new Vector2(1f, 0.55f);
             Margen(vRt, 20f);
 
             var listaGo = new GameObject("Lista", typeof(RectTransform), typeof(VerticalLayoutGroup));
             listaGo.transform.SetParent(fondo.transform, false);
             var lRt = listaGo.GetComponent<RectTransform>();
-            lRt.anchorMin = new Vector2(0f, 0f);
-            lRt.anchorMax = new Vector2(1f, 0.78f);
-            Margen(lRt, 24f);
+            lRt.anchorMin = Vector2.zero;
+            lRt.anchorMax = Vector2.one;
+            lRt.offsetMin = new Vector2(22f, 22f);
+            lRt.offsetMax = new Vector2(-22f, -(AltoCabecera + 18f));
+
             var vlg = listaGo.GetComponent<VerticalLayoutGroup>();
-            vlg.spacing = 14f;
+            vlg.spacing = 16f;
             vlg.childAlignment = TextAnchor.UpperCenter;
             vlg.childControlHeight = true;
             vlg.childForceExpandHeight = false;
-            // Sin estas dos, el ticket se queda con los 100 px por defecto de un
-            // RectTransform nuevo y el nombre del plato no cabe: solo se ve la vineta.
             vlg.childControlWidth = true;
             vlg.childForceExpandWidth = true;
 
@@ -200,63 +214,74 @@ namespace CocinaBoliviana.Editor
             return board;
         }
 
-        private const float AltoTicket = 230f;
-        private const float AltoFila = 66f;
-        private const float AltoBarra = 26f;
-
         /// <summary>
-        /// La plantilla de ticket: dos filas de icono + nombre, y debajo la barra de tiempo.
+        /// El ticket: tarjeta de papel con una franja lateral de color según la urgencia,
+        /// una fila por elemento (icono + nombre) y una barra de tiempo fina abajo.
         ///
-        /// Todo en PIXELES exactos, no en porcentajes con margen. Antes la barra se anclaba al
-        /// 4-18% de la altura (26 px) y encima se le restaban 14 arriba y 14 abajo: quedaba de
-        /// altura NEGATIVA y no se dibujaba. A las filas les pasaba lo mismo y la fuente no
-        /// cabia en la linea, asi que solo se veia el icono.
-        ///
-        /// OrderBoard busca los hijos por nombre ("Fila0", "Fila0/Icono", "Fila0/Texto",
-        /// "Barra/Relleno"), asi que esos nombres no se pueden cambiar a la ligera.
+        /// Todo en PÍXELES exactos. OrderBoard busca los hijos por nombre ("Franja", "Fila0",
+        /// "Fila0/Icono", "Fila0/Texto", "Barra/Relleno"): no se renombran a la ligera.
         /// </summary>
         private static GameObject ConstruirPlantillaTicket(Transform padre)
         {
-            var ticket = NuevoPanel(padre, "PlantillaTicket", new Color(1f, 0.98f, 0.9f, 0.96f));
-            var le = ticket.AddComponent<LayoutElement>();
-            le.preferredHeight = AltoTicket;
+            var ticket = NuevoPanel(padre, "PlantillaTicket", ColorTicket, redondeado: true);
+            ticket.AddComponent<LayoutElement>().preferredHeight = AltoTicket;
+
+            // Franja de urgencia pegada al borde izquierdo: se lee de un vistazo aunque no
+            // te fijes en la barra fina de abajo.
+            var franja = NuevoPanel(ticket.transform, "Franja", ColorAcento, redondeado: true);
+            var frRt = franja.GetComponent<RectTransform>();
+            frRt.anchorMin = new Vector2(0f, 0f);
+            frRt.anchorMax = new Vector2(0f, 1f);
+            frRt.pivot = new Vector2(0f, 0.5f);
+            frRt.sizeDelta = new Vector2(AnchoFranja, -20f);
+            frRt.anchoredPosition = new Vector2(10f, 0f);
+
+            const float margenIzq = AnchoFranja + 28f;
+            float anchoUtil = -(margenIzq + 22f);
+            float centrado = (margenIzq - 22f) * 0.5f;
 
             for (int i = 0; i < OrderBoard.FilasPorTicket; i++)
             {
                 var fila = new GameObject("Fila" + i, typeof(RectTransform));
                 fila.transform.SetParent(ticket.transform, false);
-
                 var fRt = fila.GetComponent<RectTransform>();
-                AnclarArriba(fRt, AltoFila, desdeArriba: 12f + i * (AltoFila + 8f), margenLateral: 16f);
+                fRt.anchorMin = new Vector2(0f, 1f);
+                fRt.anchorMax = new Vector2(1f, 1f);
+                fRt.pivot = new Vector2(0.5f, 1f);
+                fRt.sizeDelta = new Vector2(anchoUtil, AltoFila);
+                fRt.anchoredPosition = new Vector2(centrado, -(14f + i * (AltoFila + 6f)));
 
-                var icono = new GameObject("Icono", typeof(RectTransform), typeof(Image));
-                icono.transform.SetParent(fila.transform, false);
-                var iRt = icono.GetComponent<RectTransform>();
+                // Cuadro del icono con fondo propio, para que el sprite del plato se vea
+                // limpio aunque venga con fondo blanco.
+                var marco = NuevoPanel(fila.transform, "Icono", Color.white, redondeado: false);
+                var iRt = marco.GetComponent<RectTransform>();
                 iRt.anchorMin = new Vector2(0f, 0f);
                 iRt.anchorMax = new Vector2(0f, 1f);
                 iRt.pivot = new Vector2(0f, 0.5f);
-                iRt.sizeDelta = new Vector2(AltoFila, 0f); // cuadrado, del alto de la fila
+                iRt.sizeDelta = new Vector2(AltoFila, 0f);
                 iRt.anchoredPosition = Vector2.zero;
-                icono.GetComponent<Image>().preserveAspect = true;
+                marco.GetComponent<Image>().preserveAspect = true;
 
-                // Fuente holgada dentro de la fila: 34 px de texto en 66 px de alto.
-                Text texto = NuevoTexto(fila.transform, "Texto", "Plato", 34, TextAnchor.MiddleLeft);
-                texto.color = new Color(0.12f, 0.12f, 0.12f);
+                var texto = NuevoTexto(fila.transform, "Texto", "Plato", 34, TextAlignmentOptions.Left);
+                texto.color = ColorTinta;
+                texto.fontStyle = FontStyles.Bold;
                 var txRt = texto.GetComponent<RectTransform>();
-                txRt.anchorMin = Vector2.zero;
-                txRt.anchorMax = Vector2.one;
-                txRt.offsetMin = new Vector2(AltoFila + 14f, 0f); // hueco del icono
-                txRt.offsetMax = new Vector2(-8f, 0f);
+                Estirar(txRt);
+                txRt.offsetMin = new Vector2(AltoFila + 18f, 0f);
+                txRt.offsetMax = new Vector2(-10f, 0f);
             }
 
-            var barra = NuevoPanel(ticket.transform, "Barra", new Color(0f, 0f, 0f, 0.18f));
-            AnclarAbajo(barra.GetComponent<RectTransform>(), AltoBarra, desdeAbajo: 14f, margenLateral: 16f);
+            var barra = NuevoPanel(ticket.transform, "Barra", new Color(0f, 0f, 0f, 0.12f), redondeado: true);
+            var bRt = barra.GetComponent<RectTransform>();
+            bRt.anchorMin = new Vector2(0f, 0f);
+            bRt.anchorMax = new Vector2(1f, 0f);
+            bRt.pivot = new Vector2(0.5f, 0f);
+            bRt.sizeDelta = new Vector2(anchoUtil, AltoBarra);
+            bRt.anchoredPosition = new Vector2(centrado, 14f);
 
-            var relleno = NuevoPanel(barra.transform, "Relleno", new Color(0.35f, 0.85f, 0.4f));
+            var relleno = NuevoPanel(barra.transform, "Relleno", ColorAcento, redondeado: true);
             Estirar(relleno.GetComponent<RectTransform>());
             var img = relleno.GetComponent<Image>();
-            // Sin sprite, fillAmount no recorta nada.
-            img.sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
             img.type = Image.Type.Filled;
             img.fillMethod = Image.FillMethod.Horizontal;
             img.fillOrigin = (int)Image.OriginHorizontal.Left;
@@ -275,36 +300,38 @@ namespace CocinaBoliviana.Editor
             rt.anchoredPosition = new Vector2(0f, -desdeArriba);
         }
 
-        /// <summary>Banda de alto fijo pegada al borde inferior del padre.</summary>
-        private static void AnclarAbajo(RectTransform rt, float alto, float desdeAbajo, float margenLateral)
-        {
-            rt.anchorMin = new Vector2(0f, 0f);
-            rt.anchorMax = new Vector2(1f, 0f);
-            rt.pivot = new Vector2(0.5f, 0f);
-            rt.sizeDelta = new Vector2(-margenLateral * 2f, alto);
-            rt.anchoredPosition = new Vector2(0f, desdeAbajo);
-        }
-
-        private static GameObject NuevoPanel(Transform padre, string nombre, Color color)
+        private static GameObject NuevoPanel(Transform padre, string nombre, Color color, bool redondeado)
         {
             var go = new GameObject(nombre, typeof(RectTransform), typeof(Image));
             go.transform.SetParent(padre, false);
-            go.GetComponent<Image>().color = color;
+
+            var img = go.GetComponent<Image>();
+            img.color = color;
+            if (redondeado)
+            {
+                // El sprite integrado de Unity trae esquinas redondeadas y bordes 9-slice,
+                // así que escala sin deformarse.
+                img.sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
+                img.type = Image.Type.Sliced;
+            }
             return go;
         }
 
-        private static Text NuevoTexto(Transform padre, string nombre, string contenido, int tamano, TextAnchor alineacion)
+        private static TextMeshProUGUI NuevoTexto(Transform padre, string nombre, string contenido,
+                                                  int tamano, TextAlignmentOptions alineacion)
         {
-            var go = new GameObject(nombre, typeof(RectTransform), typeof(Text));
+            var go = new GameObject(nombre, typeof(RectTransform));
             go.transform.SetParent(padre, false);
-            var t = go.GetComponent<Text>();
+
+            // TextMeshPro y no Text: en world space el texto legacy se ve borroso al
+            // acercarse, y TMP es nítido a cualquier distancia por ser SDF.
+            var t = go.AddComponent<TextMeshProUGUI>();
             t.text = contenido;
             t.fontSize = tamano;
             t.alignment = alineacion;
             t.color = Color.white;
-            t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            t.horizontalOverflow = HorizontalWrapMode.Wrap;
-            t.verticalOverflow = VerticalWrapMode.Truncate;
+            t.overflowMode = TextOverflowModes.Truncate;
+            t.raycastTarget = false;
             return t;
         }
 

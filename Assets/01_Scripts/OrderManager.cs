@@ -56,7 +56,12 @@ namespace CocinaBoliviana
 
         private readonly List<PedidoActivo> activos = new List<PedidoActivo>();
         private float proximoPedido;
+        private float proximoRefresco;
         private int puntosInternos;
+
+        /// <summary>El departamento del nivel en curso. Lo lee el dispensador de
+        /// refrescos para saber que bebida toca servir.</summary>
+        public DepartmentData Departamento => departamento;
 
         public int Puntos => (LevelManager.Instance != null) ? LevelManager.Instance.Puntos : puntosInternos;
         public IReadOnlyList<PedidoActivo> Activos => activos;
@@ -87,7 +92,13 @@ namespace CocinaBoliviana
                 GenerarSiTocaOtro();
             }
 
-            if (tablero != null) tablero.Refrescar(activos, Puntos);
+            // El tablero a 10/s, no por frame: Refrescar reescribe los Text y eso
+            // reconstruye su malla cada vez. En VR se renderiza dos veces, asi que salia caro.
+            if (tablero != null && Time.time >= proximoRefresco)
+            {
+                proximoRefresco = Time.time + 0.1f;
+                tablero.Refrescar(activos, Puntos);
+            }
         }
 
         private void ActualizarTiempos()

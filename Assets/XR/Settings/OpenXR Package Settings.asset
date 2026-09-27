@@ -16,7 +16,7 @@ MonoBehaviour:
   nameUi: 'Android XR: AR Anchor'
   version: 0.1.0
   featureIdInternal: com.unity.openxr.feature.arfoundation-androidxr-anchor
-  openxrExtensionStrings: XR_ANDROID_trackables XR_ANDROID_device_anchor_persistence
+  openxrExtensionStrings: XR_ANDROID_trackables
   company: Unity Technologies
   priority: 0
   targetOpenXRApiVersion: 
@@ -534,7 +534,7 @@ MonoBehaviour:
   nameUi: 'Android XR: AR Anchor'
   version: 0.1.0
   featureIdInternal: com.unity.openxr.feature.arfoundation-androidxr-anchor
-  openxrExtensionStrings: XR_ANDROID_trackables XR_ANDROID_device_anchor_persistence
+  openxrExtensionStrings: XR_ANDROID_trackables
   company: Unity Technologies
   priority: 0
   targetOpenXRApiVersion: 
@@ -944,8 +944,18 @@ MonoBehaviour:
   features:
   - {fileID: -1215200647225297296}
   - {fileID: 7939053894861711510}
+  - {fileID: 6700821314418041443}
+  - {fileID: -5920695995511928972}
   - {fileID: -8878700621822116894}
+  - {fileID: 3313008659135552002}
+  - {fileID: 7847020513958364838}
+  - {fileID: -4208332362648154105}
   - {fileID: -2646499368415502112}
+  - {fileID: 8355561003221303303}
+  - {fileID: 3672091942529152940}
+  - {fileID: 8471553977381557142}
+  - {fileID: -6983464280995148112}
+  - {fileID: 4076376538424917836}
   - {fileID: 6745110126286222238}
   - {fileID: -4927156545026799390}
   - {fileID: 1476216951440746418}
