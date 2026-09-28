@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CocinaBoliviana.Data.IngredientData
   nombre: Huevo
   tipo: 5
-  prefab: {fileID: 1130464694192986417, guid: 452a024adb731ba8ea1641aa9f6302b7, type: 3}
+  prefab: {fileID: 2152278373185856053, guid: 6cc9cf83fd585ffdc9fec13fc26decee, type: 3}
   sePuedeCortar: 1
   sePuedeCocinar: 1
   cortesDisponibles: []

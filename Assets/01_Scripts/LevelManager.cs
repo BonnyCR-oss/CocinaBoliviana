@@ -25,6 +25,10 @@ namespace CocinaBoliviana
         public static LevelManager Instance { get; private set; }
 
         [Header("Información del Nivel")]
+        [Tooltip("Nivel por defecto al dar Play directamente en esta escena. Si vienes del " +
+                 "menú, manda el que hayas elegido allí.")]
+        [SerializeField] private LevelData nivelPorDefecto;
+
         [Tooltip("Nombre descriptivo para la pantalla de inicio.")]
         [SerializeField] private string nombreNivel = "Nivel 1 - Cochabamba";
 
@@ -110,12 +114,44 @@ namespace CocinaBoliviana
                 audioSource.spatialBlend = 0f; // 2D en cascos
             }
 
+            AplicarNivel();
+
             TiempoRestante = duracionNivel;
             Puntos = 0;
             RachaActual = 0;
             RachaMaxima = 0;
             PlatosEntregados = 0;
             PedidosPerdidos = 0;
+        }
+
+        /// <summary>
+        /// Vuelca el LevelData elegido sobre los campos del Inspector. Asi la MISMA escena
+        /// sirve para los tres departamentos: lo unico que cambia es que asset se eligio.
+        ///
+        /// Si no hay ninguno elegido se respeta lo puesto a mano, que es lo comodo para
+        /// probar dando a Play en la escena de cocina sin pasar por el menu.
+        /// </summary>
+        private void AplicarNivel()
+        {
+            LevelData nivel = LevelSelection.Elegido ?? nivelPorDefecto;
+            if (nivel == null) return;
+
+            nombreNivel = nivel.nombreNivel;
+            duracionNivel = nivel.duracionNivel;
+            objetivoPuntos1Estrella = nivel.objetivoPuntos1Estrella;
+            objetivoPuntos2Estrellas = nivel.objetivoPuntos2Estrellas;
+            objetivoPuntos3Estrellas = nivel.objetivoPuntos3Estrellas;
+
+            // El departamento se lo pasa al OrderManager, que es de donde lo leen tambien
+            // el dispensador de refrescos y las banderas de las paredes.
+            if (nivel.departamento != null)
+            {
+                var pedidos = FindAnyObjectByType<OrderManager>();
+                if (pedidos != null) pedidos.SetDepartamento(nivel.departamento);
+            }
+
+            Debug.Log($"[LevelManager] Nivel cargado: {nombreNivel} " +
+                      $"({(nivel.departamento != null ? nivel.departamento.nombre : "sin departamento")}).");
         }
 
         private void Start()

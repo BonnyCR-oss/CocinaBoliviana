@@ -45,6 +45,12 @@ namespace CocinaBoliviana
         public PlateItem CurrentPlate => currentPlate;
         public CookingVessel CurrentVessel => currentVessel;
 
+        /// <summary>
+        /// Último progreso de cocción recibido (0..2). Lo usa la parrilla para que un sonso
+        /// que se saca a medio hacer siga desde donde iba al volver a ponerlo.
+        /// </summary>
+        public float ProgresoCoccion { get; private set; }
+
         public void SetData(IngredientData nuevoData)
         {
             data = nuevoData;
@@ -250,6 +256,7 @@ namespace CocinaBoliviana
         /// </summary>
         public void SetProgresoCoccion(float progreso)
         {
+            ProgresoCoccion = progreso;
             estadoCoccion = progreso >= 2f ? EstadoCoccion.Quemado
                           : progreso >= 1f ? EstadoCoccion.Cocido
                           : EstadoCoccion.Crudo;

@@ -14,7 +14,7 @@ namespace CocinaBoliviana.Editor
     /// </summary>
     public static class OrdersSetup
     {
-        private const string ScenePath = "Assets/Scenes/First Scene.unity";
+        private const string ScenePath = "Assets/00_Scenes/First Scene.unity";
         private const string DepartamentosFolder = "Assets/03_SO/Departamentos";
 
         [MenuItem("Kitchen/Setup Orders (pedidos y entrega)")]

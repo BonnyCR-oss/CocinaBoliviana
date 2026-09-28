@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: La paz
   m_EditorClassIdentifier: Assembly-CSharp::CocinaBoliviana.Data.DepartmentData
   nombre: La Paz
+  bandera: {fileID: 21300000, guid: c605cf1914e990545a4f7dc53dfda9ac, type: 3}
   comidas:
   - {fileID: 11400000, guid: 0e42400674dda0c4a936abef42eec909, type: 2}
   refrescos:

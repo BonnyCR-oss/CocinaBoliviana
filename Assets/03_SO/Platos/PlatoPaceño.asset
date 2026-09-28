@@ -13,9 +13,10 @@ MonoBehaviour:
   m_Name: "PlatoPace\xF1o"
   m_EditorClassIdentifier: Assembly-CSharp::CocinaBoliviana.Data.DishData
   nombre: "Plato Pace\xF1o"
-  icono: {fileID: 0}
+  icono: {fileID: 21300000, guid: 03cec30403da70a4ea1c39b7d16f90db, type: 3}
   platoPrefab: {fileID: 3465895440945880961, guid: 02998d548e35a30489676ce794b5204b, type: 3}
   receta: []
   ingredientesRequeridos: []
+  colorLiquido: {r: 0.78, g: 0.45, b: 0.12, a: 1}
   tiempoLimite: 50
   puntos: 35

@@ -30,6 +30,10 @@ namespace CocinaBoliviana.Editor
             //    defaultCutPrefab legado que el paso 1 deja puesto en la tabla.
             Run("IngredientPrefabSetup", IngredientPrefabSetup.SetupIngredientPrefabs);
 
+            // 2b. Parrilla y sonsos: crea la masa de sonso y la receta. Antes de los menús
+            //     (que ponen la masa en el cajón) y del emplatado (que completa el sonso servido).
+            Run("GrillSetup", GrillSetup.SetupGrill);
+
             // 3. Menús flotantes: necesitan el ItemDispenser que agrega el paso 1.
             Run("DispenserMenuSetup", DispenserMenuSetup.SetupAll);
 
@@ -58,6 +62,9 @@ namespace CocinaBoliviana.Editor
             // 10. Pedidos y entrega. Al final: necesita los platos y refrescos ya
             //     preparados por los pasos anteriores.
             Run("OrdersSetup", OrdersSetup.SetupOrders);
+
+            // 11. Banderas del departamento en las paredes largas.
+            Run("FlagsSetup", FlagsSetup.SetupFlags);
 
             Debug.Log("[KitchenBootstrap] Mecánica aplicada.");
         }

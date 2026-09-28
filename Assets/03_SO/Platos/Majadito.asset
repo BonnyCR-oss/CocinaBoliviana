@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Majadito
   m_EditorClassIdentifier: Assembly-CSharp::CocinaBoliviana.Data.DishData
   nombre: Majadito
-  icono: {fileID: 0}
-  platoPrefab: {fileID: 0}
+  icono: {fileID: 21300000, guid: ddf5600a42a3da74eaa97f8f05008331, type: 3}
+  platoPrefab: {fileID: 6776382106858769935, guid: 374bdb39aa14a2548a6c7ec7ffc2b724, type: 3}
   receta:
   - ingrediente: {fileID: 11400000, guid: 45dfd7abe0b0f0484b1eded2b6205b6c, type: 2}
     corte: 0
@@ -24,10 +24,7 @@ MonoBehaviour:
     corte: 0
     debeEstarCocido: 1
     metodo: 1
-  - ingrediente: {fileID: 11400000, guid: a577d089357d0bc0c9c0b4e3c4bb046e, type: 2}
-    corte: 0
-    debeEstarCocido: 1
-    metodo: 1
   ingredientesRequeridos: []
-  tiempoLimite: 0
-  puntos: 0
+  colorLiquido: {r: 0.78, g: 0.45, b: 0.12, a: 1}
+  tiempoLimite: 40
+  puntos: 25
