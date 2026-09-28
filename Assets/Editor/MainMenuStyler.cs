@@ -11,16 +11,10 @@ namespace CocinaBoliviana.Editor
     /// 1. Cierra el cuarto (pared trasera y techo) para que al girarse en VR no se vea vacío.
     /// 2. Aplica una paleta cohesiva y minimalista en tonos cafés/mocha a todo el menú.
     /// </summary>
-    [InitializeOnLoad]
     public static class MainMenuStyler
     {
-        private const string MainMenuScenePath = "Assets/Scenes/Main Menu.unity";
+        private const string MainMenuScenePath = "Assets/00_Scenes/Main Menu.unity";
         private const string AutoRunSessionKey = "MainMenuStyler_AutoRun_v1";
-
-        static MainMenuStyler()
-        {
-            EditorApplication.delayCall += OnEditorReady;
-        }
 
         private static void OnEditorReady()
         {

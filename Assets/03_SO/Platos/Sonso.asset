@@ -13,9 +13,14 @@ MonoBehaviour:
   m_Name: Sonso
   m_EditorClassIdentifier: Assembly-CSharp::CocinaBoliviana.Data.DishData
   nombre: Sonso
-  icono: {fileID: 0}
-  platoPrefab: {fileID: 0}
-  receta: []
+  icono: {fileID: 21300000, guid: 3a7b57c819f45694bb06ee4cb4a0ccac, type: 3}
+  platoPrefab: {fileID: 421911550207763847, guid: f3dc07268c3d0f44580c8d58dd856fac, type: 3}
+  receta:
+  - ingrediente: {fileID: 11400000, guid: f59b9353dc600ed429248e7f13bcb812, type: 2}
+    corte: 0
+    debeEstarCocido: 1
+    metodo: 2
   ingredientesRequeridos: []
-  tiempoLimite: 0
-  puntos: 0
+  colorLiquido: {r: 0.78, g: 0.45, b: 0.12, a: 1}
+  tiempoLimite: 30
+  puntos: 15

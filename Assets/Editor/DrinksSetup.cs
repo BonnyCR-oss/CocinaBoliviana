@@ -17,7 +17,7 @@ namespace CocinaBoliviana.Editor
     /// </summary>
     public static class DrinksSetup
     {
-        private const string ScenePath = "Assets/Scenes/First Scene.unity";
+        private const string ScenePath = "Assets/00_Scenes/First Scene.unity";
         private const string VasoModelPath = "Assets/04_Models/DrinksModel/VasoPlasticoModel.glb";
         // El vaso lo hiciste tu, con su tamano ya ajustado. Aqui solo se le anaden los
         // componentes que le faltan; ni la escala ni el collider se tocan.

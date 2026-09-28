@@ -14,11 +14,10 @@ namespace CocinaBoliviana.Editor
     /// estética de cristal oscuro con bordes redondeados y botones centrados.
     /// Conecta los tres cajones de la despensa y la tabla de cortar en "First Scene".
     /// </summary>
-    [InitializeOnLoad]
     public static class DispenserMenuSetup
     {
-        private const string FirstScenePath = "Assets/Scenes/First Scene.unity";
-        private const string MainMenuScenePath = "Assets/Scenes/Main Menu.unity";
+        private const string FirstScenePath = "Assets/00_Scenes/First Scene.unity";
+        private const string MainMenuScenePath = "Assets/00_Scenes/Main Menu.unity";
         private const string MenuPrefabPath = "Assets/02_Prefabs/UI/IngredientSelectorMenu.prefab";
         private const string SessionKey = "DispenserMenuSetup_V6_AutoExecuted";
 
@@ -27,18 +26,6 @@ namespace CocinaBoliviana.Editor
 
         /// <summary>Altura del menú sobre la tabla de corte, en metros.</summary>
         private const float AlturaMenuTabla = 0.45f;
-
-        static DispenserMenuSetup()
-        {
-            EditorApplication.delayCall += () =>
-            {
-                if (!SessionState.GetBool(SessionKey, false))
-                {
-                    SessionState.SetBool(SessionKey, true);
-                    SetupAll();
-                }
-            };
-        }
 
         [MenuItem("Kitchen/Setup Ingredient Selector Menu")]
         public static void SetupAll()
@@ -342,7 +329,7 @@ namespace CocinaBoliviana.Editor
 
         private static readonly (string crate, string[] ingredientes)[] Reparto =
         {
-            ("Cajon_Papas",    new[] { "Papa", "Arroz" }),
+            ("Cajon_Papas",    new[] { "Papa", "Arroz", "SonsoCrudo" }),
             ("Cajon_Carne",    new[] { "Carne", "Huevo" }),
             ("Cajon_Verduras", new[] { "Tomate", "Cebolla" }),
         };

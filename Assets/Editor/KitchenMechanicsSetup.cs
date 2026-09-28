@@ -13,7 +13,7 @@ namespace CocinaBoliviana.Editor
 {
     public static class KitchenMechanicsSetup
     {
-        private const string ScenePath = "Assets/Scenes/First Scene.unity";
+        private const string ScenePath = "Assets/00_Scenes/First Scene.unity";
         private const string PrefabsFolder = "Assets/02_Prefabs";
         private const string TomatoGlbPath = "Assets/04_Models/IngredientesModel/tomate.glb";
         private const string TomatePicadoGlbPath = "Assets/04_Models/IngredientesModel/TomatePicado.glb";

@@ -9,6 +9,9 @@ namespace CocinaBoliviana
     /// Vaso de plástico vacío. Se llena bajo el dispensador y, al terminar, se sustituye por
     /// el modelo del refresco servido, que ya viene con su propio vaso.
     ///
+    /// Es fijo: nace bajo el grifo y ahí se queda. Lo que el jugador se lleva es el
+    /// refresco servido, no el vaso vacío.
+    ///
     /// El llenado se simula con un cilindro de líquido dentro del vaso que crece en Y. No
     /// hace falta modelar nada: se genera por código y se le pone el color de la bebida.
     /// </summary>
@@ -26,6 +29,10 @@ namespace CocinaBoliviana
         [Tooltip("Altura del fondo del vaso sobre su pivote, en metros. Súbelo si el líquido " +
                  "asoma por debajo del modelo.")]
         [SerializeField] private float alturaBase = 0.01f;
+
+        [Tooltip("No se puede agarrar: se queda bajo el grifo hasta llenarse. Desmárcalo " +
+                 "solo si quieres volver a llevar vasos vacíos a mano.")]
+        [SerializeField] private bool fijo = true;
 
         private Renderer liquidoRenderer;
         private MaterialPropertyBlock bloque;
@@ -47,7 +54,13 @@ namespace CocinaBoliviana
 
             rb = GetComponent<Rigidbody>();
             grab = GetComponent<XRGrabInteractable>();
-            if (grab != null) grab.selectExited.AddListener(OnSoltado);
+            if (grab != null)
+            {
+                // Desactivado, el interactable se da de baja del XR Interaction Manager: ni
+                // se resalta al apuntarlo ni se puede coger.
+                if (fijo) grab.enabled = false;
+                else grab.selectExited.AddListener(OnSoltado);
+            }
 
             // Se queda quieto donde lo dejes. Siendo dinamico rodaba por la mesa y se caia
             // del dispensador al menor roce.

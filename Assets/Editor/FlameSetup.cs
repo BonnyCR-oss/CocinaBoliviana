@@ -15,7 +15,7 @@ namespace CocinaBoliviana.Editor
     /// </summary>
     public static class FlameSetup
     {
-        private const string ScenePath = "Assets/Scenes/First Scene.unity";
+        private const string ScenePath = "Assets/00_Scenes/First Scene.unity";
         private const string TexturesFolder = "Assets/Materials/Textures";
         private const string FlameTexturePath = TexturesFolder + "/Flame_Particle.png";
         private const string FlameMaterialPath = "Assets/Materials/Mat_Flame.mat";
@@ -58,7 +58,7 @@ namespace CocinaBoliviana.Editor
         /// Degradado radial suave, blanco con alfa decreciente. El color lo pone el
         /// Color over Lifetime del sistema de partículas, no la textura.
         /// </summary>
-        private static Texture2D EnsureFlameTexture()
+        internal static Texture2D EnsureFlameTexture()
         {
             Texture2D existente = AssetDatabase.LoadAssetAtPath<Texture2D>(FlameTexturePath);
             if (existente != null) return existente;
@@ -101,7 +101,7 @@ namespace CocinaBoliviana.Editor
             return AssetDatabase.LoadAssetAtPath<Texture2D>(FlameTexturePath);
         }
 
-        private static Material EnsureFlameMaterial(Texture2D textura)
+        internal static Material EnsureFlameMaterial(Texture2D textura)
         {
             Material mat = AssetDatabase.LoadAssetAtPath<Material>(FlameMaterialPath);
             if (mat == null)

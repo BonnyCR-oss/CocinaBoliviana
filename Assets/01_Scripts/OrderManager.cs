@@ -45,7 +45,8 @@ namespace CocinaBoliviana
         [SerializeField] private float segundosEntrePedidos = 25f;
         [SerializeField] private float primerPedidoTrasSegundos = 5f;
 
-        [Tooltip("Cuánto aguanta un pedido antes de caducar, si el plato no define el suyo.")]
+        [Tooltip("Segundos que aporta al pedido un plato sin 'Tiempo Limite' propio. El tiempo " +
+                 "de un pedido es la SUMA del de cada cosa que pide.")]
         [SerializeField] private float tiempoPorDefecto = 120f;
 
         [Tooltip("Cuántos elementos puede pedir un ticket: comida, refresco o los dos.")]
@@ -62,6 +63,18 @@ namespace CocinaBoliviana
         /// <summary>El departamento del nivel en curso. Lo lee el dispensador de
         /// refrescos para saber que bebida toca servir.</summary>
         public DepartmentData Departamento => departamento;
+
+        /// <summary>
+        /// Lo llama LevelManager al cargar el nivel. Se resetea el reloj de pedidos porque
+        /// el menu acaba de cambiar por completo.
+        /// </summary>
+        public void SetDepartamento(DepartmentData nuevo)
+        {
+            departamento = nuevo;
+            activos.Clear();
+            proximoPedido = primerPedidoTrasSegundos;
+            enabled = true;
+        }
 
         public int Puntos => (LevelManager.Instance != null) ? LevelManager.Instance.Puntos : puntosInternos;
         public IReadOnlyList<PedidoActivo> Activos => activos;
@@ -198,9 +211,9 @@ namespace CocinaBoliviana
                 pedido.Todos.Add(elegido);
                 puntos += Mathf.Max(elegido.puntos, 0);
 
-                // El tiempo lo marca el plato más lento del ticket: si no, un pedido con dos
-                // platos sería más difícil que la suma de sus partes.
-                tiempo = Mathf.Max(tiempo, elegido.tiempoLimite);
+                // Se SUMA el tiempo de preparación de cada cosa del ticket: hay que hacerlas
+                // todas, y con solo el del más lento un Sonso + Zomo no daba ni para el sonso.
+                tiempo += (elegido.tiempoLimite > 0f) ? elegido.tiempoLimite : tiempoPorDefecto;
             }
 
             pedido.Recompensa = puntos;

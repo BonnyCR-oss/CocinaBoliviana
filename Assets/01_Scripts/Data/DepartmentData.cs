@@ -9,6 +9,10 @@ namespace CocinaBoliviana.Data
         [Header("Informacion General")]
         public string nombre;
 
+        [Tooltip("Bandera del departamento. Se muestra en las paredes del ambiente cuando " +
+                 "este es el nivel en curso.")]
+        public Sprite bandera;
+
         [Header("Menu Tipico")]
         public List<DishData> comidas = new List<DishData>();
         public List<DishData> refrescos = new List<DishData>();

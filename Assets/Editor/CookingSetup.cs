@@ -16,7 +16,7 @@ namespace CocinaBoliviana.Editor
     /// </summary>
     public static class CookingSetup
     {
-        private const string ScenePath = "Assets/Scenes/First Scene.unity";
+        private const string ScenePath = "Assets/00_Scenes/First Scene.unity";
         private const string CounterPrefabPath = "Assets/02_Prefabs/UI/CookingCounter.prefab";
 
         /// <summary>Nombre del objeto en la escena y con qué método cocina.</summary>
@@ -222,7 +222,10 @@ namespace CocinaBoliviana.Editor
                     float d = Vector3.Distance(f.transform.position, go.transform.position);
                     if (d < mejorDist) { mejorDist = d; masCercano = f; }
                 }
-                if (masCercano != null && mejorDist < 1f)
+                // La parrilla es de carbón: lleva sus propias brasas (GrillSetup) y no debe
+                // encender la llama de una hornalla que tenga al lado.
+                bool usaHornalla = metodo != MetodoCoccion.Asar && masCercano != null && mejorDist < 1f;
+                if (usaHornalla)
                 {
                     so.FindProperty("fuego").objectReferenceValue = masCercano;
                 }
@@ -230,7 +233,7 @@ namespace CocinaBoliviana.Editor
                 so.ApplyModifiedPropertiesWithoutUndo();
                 algoCambio = true;
 
-                string conFuego = (masCercano != null && mejorDist < 1f) ? $", fuego '{masCercano.name}'" : ", SIN fuego cerca";
+                string conFuego = usaHornalla ? $", fuego '{masCercano.name}'" : ", SIN fuego de hornalla";
                 Debug.Log($"[CookingSetup] '{nombre}' -> {metodo}{conFuego}.");
             }
 

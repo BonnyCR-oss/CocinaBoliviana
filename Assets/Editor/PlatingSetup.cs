@@ -154,7 +154,7 @@ namespace CocinaBoliviana.Editor
         /// </summary>
         private static void CrearPuntoDeRecogida()
         {
-            Scene scene = EditorSceneManager.OpenScene("Assets/Scenes/First Scene.unity", OpenSceneMode.Single);
+            Scene scene = EditorSceneManager.OpenScene("Assets/00_Scenes/First Scene.unity", OpenSceneMode.Single);
             if (!scene.IsValid()) return;
 
             if (Object.FindAnyObjectByType<DishPickupPoint>() != null)

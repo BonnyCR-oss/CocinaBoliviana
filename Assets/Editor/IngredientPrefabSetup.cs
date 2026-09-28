@@ -16,7 +16,7 @@ namespace CocinaBoliviana.Editor
     public static class IngredientPrefabSetup
     {
         private const string PrefabsFolder = "Assets/02_Prefabs/IngredientePrefabs";
-        private const string ScenePath = "Assets/Scenes/First Scene.unity";
+        private const string ScenePath = "Assets/00_Scenes/First Scene.unity";
         private const float DesiredWorldColliderRadius = 0.06f;
 
         private class CorteSpec
@@ -77,6 +77,12 @@ namespace CocinaBoliviana.Editor
                     ingredientDataPath = "Assets/03_SO/Ingredientes/Huevo.asset",
                     prefabPath = $"{PrefabsFolder}/huevo.prefab",
                 },
+                // Sonso crudo para la parrilla; GrillSetup completa sus datos de cocción.
+                new IngredienteSpec
+                {
+                    ingredientDataPath = "Assets/03_SO/Ingredientes/SonsoCrudo.asset",
+                    prefabPath = $"{PrefabsFolder}/SonsoPrefab.prefab",
+                },
             };
 
             foreach (var spec in specs)
@@ -113,7 +119,7 @@ namespace CocinaBoliviana.Editor
             Debug.Log("[IngredientPrefabSetup] Listo. Los colliders se ajustan solos a la malla de cada ingrediente.");
         }
 
-        private static GameObject EnsureIngredientPrefab(string prefabPath, IngredientData data, bool isCut)
+        internal static GameObject EnsureIngredientPrefab(string prefabPath, IngredientData data, bool isCut)
         {
             GameObject prefabAsset = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
             if (prefabAsset == null)

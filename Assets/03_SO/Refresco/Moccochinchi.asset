@@ -17,5 +17,6 @@ MonoBehaviour:
   platoPrefab: {fileID: 3937641919549609138, guid: 218133674f2f3c6418862022a78c617d, type: 3}
   receta: []
   ingredientesRequeridos: []
-  tiempoLimite: 7
+  colorLiquido: {r: 0.78, g: 0.45, b: 0.12, a: 1}
+  tiempoLimite: 20
   puntos: 15

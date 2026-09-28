@@ -11,18 +11,12 @@ namespace CocinaBoliviana.Editor
     /// Generador del prefab LevelManager y configurador del sistema de puntuación Overcooked
     /// para First Scene y cualquier nivel futuro (Niveles 2, 3, 4).
     /// </summary>
-    [InitializeOnLoad]
     public static class LevelSetup
     {
-        private const string FirstScenePath = "Assets/Scenes/First Scene.unity";
+        private const string FirstScenePath = "Assets/00_Scenes/First Scene.unity";
         private const string PrefabFolder = "Assets/02_Prefabs/LevelManagement";
         private const string PrefabPath = "Assets/02_Prefabs/LevelManagement/LevelManager.prefab";
         private const string AutoRunSessionKey = "LevelSetup_AutoRun_Completed_v4";
-
-        static LevelSetup()
-        {
-            EditorApplication.delayCall += OnEditorReady;
-        }
 
         private static void OnEditorReady()
         {
