@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CocinaBoliviana.Data.DepartmentData
   nombre: Cochabamba
   bandera: {fileID: 21300000, guid: 70a25d08a7ade3340b6e620b5fe81a05, type: 3}
-  comidas:
-  - {fileID: 11400000, guid: f34a678b0eb665948a79f9128c10b643, type: 2}
+  comidas: []
   refrescos:
   - {fileID: 11400000, guid: 0ca51637ae4bdd842b4982b81231c7ee, type: 2}
   pedidos: []
