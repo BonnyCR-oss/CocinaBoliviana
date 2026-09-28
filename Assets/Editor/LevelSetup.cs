@@ -506,8 +506,8 @@ namespace CocinaBoliviana.Editor
             var btnReintentarGo = new GameObject("BotonReintentar", typeof(RectTransform), typeof(Image), typeof(Button));
             btnReintentarGo.transform.SetParent(endCardGo.transform, false);
             var btnReintentarRt = btnReintentarGo.GetComponent<RectTransform>();
-            btnReintentarRt.anchorMin = new Vector2(0.12f, 0.06f);
-            btnReintentarRt.anchorMax = new Vector2(0.48f, 0.17f);
+            btnReintentarRt.anchorMin = new Vector2(0.04f, 0.06f);
+            btnReintentarRt.anchorMax = new Vector2(0.32f, 0.17f);
             btnReintentarRt.offsetMin = Vector2.zero;
             btnReintentarRt.offsetMax = Vector2.zero;
             var btnReintentarImg = btnReintentarGo.GetComponent<Image>();
@@ -523,19 +523,48 @@ namespace CocinaBoliviana.Editor
             btnReintentarTextRt.offsetMin = Vector2.zero;
             btnReintentarTextRt.offsetMax = Vector2.zero;
             var btnReintentarTxt = btnReintentarTextGo.GetComponent<Text>();
-            btnReintentarTxt.text = "REINTENTAR  [R]";
+            btnReintentarTxt.text = "REINTENTAR [R]";
             btnReintentarTxt.font = mainFont;
-            btnReintentarTxt.fontSize = 22;
+            btnReintentarTxt.fontSize = 18;
             btnReintentarTxt.fontStyle = FontStyle.Bold;
             btnReintentarTxt.alignment = TextAnchor.MiddleCenter;
             btnReintentarTxt.color = Color.white;
-            btnReintentarTxt.raycastTarget = false; // Permite que el click llegue al botón directamente
+            btnReintentarTxt.raycastTarget = false;
+
+            // Botón Siguiente Nivel
+            var btnSiguienteGo = new GameObject("BotonSiguienteNivel", typeof(RectTransform), typeof(Image), typeof(Button));
+            btnSiguienteGo.transform.SetParent(endCardGo.transform, false);
+            var btnSiguienteRt = btnSiguienteGo.GetComponent<RectTransform>();
+            btnSiguienteRt.anchorMin = new Vector2(0.36f, 0.06f);
+            btnSiguienteRt.anchorMax = new Vector2(0.64f, 0.17f);
+            btnSiguienteRt.offsetMin = Vector2.zero;
+            btnSiguienteRt.offsetMax = Vector2.zero;
+            var btnSiguienteImg = btnSiguienteGo.GetComponent<Image>();
+            if (roundSprite != null) { btnSiguienteImg.sprite = roundSprite; btnSiguienteImg.type = Image.Type.Sliced; }
+            btnSiguienteImg.color = new Color(0.88f, 0.60f, 0.12f, 0.95f); // Dorado cálido
+            var btnSiguienteComp = btnSiguienteGo.GetComponent<Button>();
+
+            var btnSiguienteTextGo = new GameObject("Text", typeof(RectTransform), typeof(Text));
+            btnSiguienteTextGo.transform.SetParent(btnSiguienteGo.transform, false);
+            var btnSiguienteTextRt = btnSiguienteTextGo.GetComponent<RectTransform>();
+            btnSiguienteTextRt.anchorMin = Vector2.zero;
+            btnSiguienteTextRt.anchorMax = Vector2.one;
+            btnSiguienteTextRt.offsetMin = Vector2.zero;
+            btnSiguienteTextRt.offsetMax = Vector2.zero;
+            var btnSiguienteTxt = btnSiguienteTextGo.GetComponent<Text>();
+            btnSiguienteTxt.text = "SIGUIENTE [N]";
+            btnSiguienteTxt.font = mainFont;
+            btnSiguienteTxt.fontSize = 18;
+            btnSiguienteTxt.fontStyle = FontStyle.Bold;
+            btnSiguienteTxt.alignment = TextAnchor.MiddleCenter;
+            btnSiguienteTxt.color = Color.white;
+            btnSiguienteTxt.raycastTarget = false;
 
             var btnMenuGo = new GameObject("BotonMenuPrincipal", typeof(RectTransform), typeof(Image), typeof(Button));
             btnMenuGo.transform.SetParent(endCardGo.transform, false);
             var btnMenuRt = btnMenuGo.GetComponent<RectTransform>();
-            btnMenuRt.anchorMin = new Vector2(0.52f, 0.06f);
-            btnMenuRt.anchorMax = new Vector2(0.88f, 0.17f);
+            btnMenuRt.anchorMin = new Vector2(0.68f, 0.06f);
+            btnMenuRt.anchorMax = new Vector2(0.96f, 0.17f);
             btnMenuRt.offsetMin = Vector2.zero;
             btnMenuRt.offsetMax = Vector2.zero;
             var btnMenuImg = btnMenuGo.GetComponent<Image>();
@@ -551,9 +580,9 @@ namespace CocinaBoliviana.Editor
             btnMenuTextRt.offsetMin = Vector2.zero;
             btnMenuTextRt.offsetMax = Vector2.zero;
             var btnMenuTxt = btnMenuTextGo.GetComponent<Text>();
-            btnMenuTxt.text = "MENÚ PRINCIPAL  [M]";
+            btnMenuTxt.text = "MENÚ [M]";
             btnMenuTxt.font = mainFont;
-            btnMenuTxt.fontSize = 20;
+            btnMenuTxt.fontSize = 18;
             btnMenuTxt.fontStyle = FontStyle.Bold;
             btnMenuTxt.alignment = TextAnchor.MiddleCenter;
             btnMenuTxt.color = Color.white;
@@ -589,6 +618,7 @@ namespace CocinaBoliviana.Editor
             hudSo.FindProperty("textoEstrellasFin").objectReferenceValue = endStarsTxt;
             hudSo.FindProperty("textoResumenStats").objectReferenceValue = statsTxt;
             hudSo.FindProperty("botonReintentar").objectReferenceValue = btnReintentarComp;
+            hudSo.FindProperty("botonSiguienteNivel").objectReferenceValue = btnSiguienteComp;
             hudSo.FindProperty("botonMenuPrincipal").objectReferenceValue = btnMenuComp;
 
             hudSo.ApplyModifiedPropertiesWithoutUndo();

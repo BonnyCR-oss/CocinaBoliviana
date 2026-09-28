@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CocinaBoliviana.Data.LevelData
   nombreNivel: Nivel 1 - Cochabamba
   departamento: {fileID: 11400000, guid: dfb82a7404f21ee85ac3e6fb680b5583, type: 2}
-  duracionNivel: 150
-  objetivoPuntos1Estrella: 80
-  objetivoPuntos2Estrellas: 150
-  objetivoPuntos3Estrellas: 220
+  duracionNivel: 180
+  objetivoPuntos1Estrella: 120
+  objetivoPuntos2Estrellas: 220
+  objetivoPuntos3Estrellas: 320

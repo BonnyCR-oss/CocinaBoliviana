@@ -40,6 +40,7 @@ namespace CocinaBoliviana
         [SerializeField] private Text textoEstrellasFin;
         [SerializeField] private Text textoResumenStats;
         [SerializeField] private Button botonReintentar;
+        [SerializeField] private Button botonSiguienteNivel;
         [SerializeField] private Button botonMenuPrincipal;
 
         [Header("Colores")]
@@ -81,6 +82,11 @@ namespace CocinaBoliviana
             {
                 botonReintentar.onClick.RemoveAllListeners();
                 botonReintentar.onClick.AddListener(() => lm.ReiniciarNivel());
+            }
+            if (botonSiguienteNivel != null)
+            {
+                botonSiguienteNivel.onClick.RemoveAllListeners();
+                botonSiguienteNivel.onClick.AddListener(() => lm.CargarSiguienteNivel());
             }
             if (botonMenuPrincipal != null)
             {
@@ -303,18 +309,33 @@ namespace CocinaBoliviana
 
             bool victoria = lm.NivelSuperado;
             int estrellas = lm.EstrellasConseguidas;
+            bool esUltimoNivel = lm.NumeroNivel >= GameProgressManager.NivelMaximo;
 
             if (textoTituloFin != null)
             {
-                textoTituloFin.text = victoria ? "¡NIVEL COMPLETADO!" : "¡TIEMPO AGOTADO!";
+                if (victoria)
+                {
+                    textoTituloFin.text = esUltimoNivel ? "¡MAESTRO DE LA COCINA BOLIVIANA!" : "¡NIVEL COMPLETADO!";
+                }
+                else
+                {
+                    textoTituloFin.text = "¡TIEMPO AGOTADO!";
+                }
                 textoTituloFin.color = victoria ? new Color(1f, 0.84f, 0.2f) : new Color(0.95f, 0.35f, 0.35f);
             }
 
             if (textoSubtituloFin != null)
             {
-                textoSubtituloFin.text = victoria
-                    ? $"¡Excelente servicio en {lm.NombreNivel}!"
-                    : $"Te faltaron {Mathf.Max(0, lm.Objetivo1Estrella - lm.Puntos)} puntos para la meta mínima de 1★.";
+                if (victoria)
+                {
+                    textoSubtituloFin.text = esUltimoNivel
+                        ? "¡Felicidades! Has dominado los sabores tradicionales de Cochabamba, La Paz y Santa Cruz."
+                        : $"¡Excelente servicio en {lm.NombreNivel}!";
+                }
+                else
+                {
+                    textoSubtituloFin.text = $"Te faltaron {Mathf.Max(0, lm.Objetivo1Estrella - lm.Puntos)} puntos para la meta mínima de 1★.";
+                }
             }
 
             if (textoEstrellasFin != null)
@@ -330,6 +351,12 @@ namespace CocinaBoliviana
                     $"Platos Entregados: <b>{lm.PlatosEntregados}</b>\n" +
                     $"Pedidos Perdidos: <b>{lm.PedidosPerdidos}</b>\n" +
                     $"Mejor Racha: <b>x{lm.RachaMaxima}</b>";
+            }
+
+            if (botonSiguienteNivel != null)
+            {
+                // Solo se muestra el botón de siguiente nivel si ganó y no es el último nivel de la campaña
+                botonSiguienteNivel.gameObject.SetActive(victoria && !esUltimoNivel);
             }
 
             // Desbloquear cursor para clicks con ratón en simulator
@@ -362,10 +389,15 @@ namespace CocinaBoliviana
             if (endModalRoot != null && endModalRoot.activeSelf && lm != null)
             {
                 // Atajos inmediatos por teclado para máxima comodidad
-                if (Input.GetKeyDown(KeyCode.R) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
+                if (Input.GetKeyDown(KeyCode.R) || Input.GetKeyDown(KeyCode.Space))
                 {
                     Debug.Log("[LevelScreenHUD] Atajo de teclado (R/Espacio) -> Reiniciando nivel...");
                     lm.ReiniciarNivel();
+                }
+                else if (Input.GetKeyDown(KeyCode.N) && lm.NivelSuperado && lm.NumeroNivel < GameProgressManager.NivelMaximo)
+                {
+                    Debug.Log("[LevelScreenHUD] Atajo de teclado (N) -> Siguiente nivel...");
+                    lm.CargarSiguienteNivel();
                 }
                 else if (Input.GetKeyDown(KeyCode.M) || Input.GetKeyDown(KeyCode.Escape))
                 {

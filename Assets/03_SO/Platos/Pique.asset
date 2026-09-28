@@ -19,9 +19,13 @@ MonoBehaviour:
   - ingrediente: {fileID: 11400000, guid: da37c04e5e709d7d2ab901859c7c7917, type: 2}
     corte: 2
     debeEstarCocido: 1
-    metodo: 0
+    metodo: 1
+  - ingrediente: {fileID: 11400000, guid: 70c2ec4bd13c0d14fac7583febf90db6, type: 2}
+    corte: 1
+    debeEstarCocido: 1
+    metodo: 1
   - ingrediente: {fileID: 11400000, guid: 1893d54cffd80fa8b9d3529c8eea39b7, type: 2}
-    corte: 3
+    corte: 1
     debeEstarCocido: 1
     metodo: 1
   - ingrediente: {fileID: 11400000, guid: a577d089357d0bc0c9c0b4e3c4bb046e, type: 2}
@@ -36,11 +40,7 @@ MonoBehaviour:
     corte: 1
     debeEstarCocido: 0
     metodo: 0
-  - ingrediente: {fileID: 11400000, guid: 70c2ec4bd13c0d14fac7583febf90db6, type: 2}
-    corte: 1
-    debeEstarCocido: 1
-    metodo: 0
   ingredientesRequeridos: []
   colorLiquido: {r: 0.78, g: 0.45, b: 0.12, a: 1}
-  tiempoLimite: 50
-  puntos: 35
+  tiempoLimite: 95
+  puntos: 65

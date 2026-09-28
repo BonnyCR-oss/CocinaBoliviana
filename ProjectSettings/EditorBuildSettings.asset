@@ -9,6 +9,15 @@ EditorBuildSettings:
     path: Assets/00_Scenes/Main Menu.unity
     guid: 6b773e6bb5d489f4891bbcb7169dfb4f
   - enabled: 1
+    path: Assets/00_Scenes/Nivel 1 - Cochabamba.unity
+    guid: 38d7c19bd3dc34e44bf0e9e15380afaa
+  - enabled: 1
+    path: Assets/00_Scenes/Nivel 2 - La Paz.unity
+    guid: b69066a45bfb0e24caa28e42a83d78d5
+  - enabled: 1
+    path: Assets/00_Scenes/Nivel 3 - Santa Cruz.unity
+    guid: a73c3b4c3877b0644b25b7180412b959
+  - enabled: 0
     path: Assets/00_Scenes/First Scene.unity
     guid: 6b773e6bb5d489f4891bbcb7169dfb4e
   m_configObjects:

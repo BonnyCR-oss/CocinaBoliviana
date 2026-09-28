@@ -8855,7 +8855,7 @@ MonoBehaviour:
   ingredienteReferencia: {fileID: 11400000, guid: f59b9353dc600ed429248e7f13bcb812, type: 2}
   opcionesIngredientes:
   - {fileID: 11400000, guid: 1893d54cffd80fa8b9d3529c8eea39b7, type: 2}
-  - {fileID: 11400000, guid: 45dfd7abe0b0f0484b1eded2b6205b6c, type: 2}
+  - {fileID: 11400000, guid: 945c349a870f2074693d18b93c268647, type: 2}
   menu: {fileID: 2005172242}
   spawnPoint: {fileID: 0}
   cooldownTime: 0.35
@@ -9457,7 +9457,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e6736c16067b0344ad72a5476300f91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CocinaBoliviana.OrderManager
-  departamento: {fileID: 11400000, guid: dfb82a7404f21ee85ac3e6fb680b5583, type: 2}
+  departamento: {fileID: 11400000, guid: d8d29651999c18b41839b43d0077685e, type: 2}
   maxPedidosActivos: 4
   segundosEntrePedidos: 35
   primerPedidoTrasSegundos: 10
@@ -13054,6 +13054,91 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!1001 &960576703
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2185862588638206268, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
+      propertyPath: m_Name
+      value: LevelManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 3784117406841357018, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
+      propertyPath: nombreNivel
+      value: Nivel 2 - La Paz
+      objectReference: {fileID: 0}
+    - target: {fileID: 3784117406841357018, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
+      propertyPath: numeroNivel
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3784117406841357018, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
+      propertyPath: duracionNivel
+      value: 180
+      objectReference: {fileID: 0}
+    - target: {fileID: 3784117406841357018, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
+      propertyPath: nivelPorDefecto
+      value: 
+      objectReference: {fileID: 11400000, guid: 363654e693a35fd4ab4329975c705886, type: 2}
+    - target: {fileID: 3784117406841357018, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
+      propertyPath: objetivoPuntos1Estrella
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 3784117406841357018, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
+      propertyPath: objetivoPuntos2Estrellas
+      value: 190
+      objectReference: {fileID: 0}
+    - target: {fileID: 3784117406841357018, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
+      propertyPath: objetivoPuntos3Estrellas
+      value: 280
+      objectReference: {fileID: 0}
+    - target: {fileID: 5830594538152853561, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5830594538152853561, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5830594538152853561, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5830594538152853561, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5830594538152853561, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5830594538152853561, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5830594538152853561, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5830594538152853561, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5830594538152853561, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5830594538152853561, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
 --- !u!1 &961804084
 GameObject:
   m_ObjectHideFlags: 0
@@ -20159,7 +20244,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CocinaBoliviana.WallFlag
   imagen: {fileID: 1135020141}
-  departamentoDePrueba: {fileID: 11400000, guid: dfb82a7404f21ee85ac3e6fb680b5583, type: 2}
+  departamentoDePrueba: {fileID: 11400000, guid: d8d29651999c18b41839b43d0077685e, type: 2}
   intervaloComprobacion: 1
 --- !u!114 &1205866186
 MonoBehaviour:
@@ -23485,7 +23570,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CocinaBoliviana.WallFlag
   imagen: {fileID: 249505943}
-  departamentoDePrueba: {fileID: 11400000, guid: dfb82a7404f21ee85ac3e6fb680b5583, type: 2}
+  departamentoDePrueba: {fileID: 11400000, guid: d8d29651999c18b41839b43d0077685e, type: 2}
   intervaloComprobacion: 1
 --- !u!114 &1646347156
 MonoBehaviour:
@@ -23986,8 +24071,7 @@ MonoBehaviour:
   ingredienteReferencia: {fileID: 11400000, guid: 70c2ec4bd13c0d14fac7583febf90db6, type: 2}
   opcionesIngredientes:
   - {fileID: 11400000, guid: da37c04e5e709d7d2ab901859c7c7917, type: 2}
-  - {fileID: 11400000, guid: 70c2ec4bd13c0d14fac7583febf90db6, type: 2}
-  - {fileID: 11400000, guid: a577d089357d0bc0c9c0b4e3c4bb046e, type: 2}
+  - {fileID: 11400000, guid: f55f17e5883523549802ffd1a41fe8fe, type: 2}
   menu: {fileID: 335404289}
   spawnPoint: {fileID: 0}
   cooldownTime: 0.35
@@ -24013,83 +24097,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.2, y: 1.2, z: 1.5}
   m_Center: {x: 0, y: 0, z: 0.25}
---- !u!1001 &1692339264
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 2185862588638206268, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
-      propertyPath: m_Name
-      value: LevelManager
-      objectReference: {fileID: 0}
-    - target: {fileID: 3784117406841357018, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
-      propertyPath: duracionNivel
-      value: 180
-      objectReference: {fileID: 0}
-    - target: {fileID: 3784117406841357018, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
-      propertyPath: nivelPorDefecto
-      value: 
-      objectReference: {fileID: 11400000, guid: ddaabf49fbce3494ba344f1ed1eab600, type: 2}
-    - target: {fileID: 3784117406841357018, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
-      propertyPath: objetivoPuntos1Estrella
-      value: 120
-      objectReference: {fileID: 0}
-    - target: {fileID: 3784117406841357018, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
-      propertyPath: objetivoPuntos2Estrellas
-      value: 220
-      objectReference: {fileID: 0}
-    - target: {fileID: 3784117406841357018, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
-      propertyPath: objetivoPuntos3Estrellas
-      value: 320
-      objectReference: {fileID: 0}
-    - target: {fileID: 5830594538152853561, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5830594538152853561, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5830594538152853561, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5830594538152853561, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5830594538152853561, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5830594538152853561, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5830594538152853561, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5830594538152853561, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5830594538152853561, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5830594538152853561, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 3c48f23791857ba4fba1419726e9aa73, type: 3}
 --- !u!1 &1695440307
 GameObject:
   m_ObjectHideFlags: 0
@@ -32611,4 +32618,4 @@ SceneRoots:
   - {fileID: 525413183}
   - {fileID: 1985000002}
   - {fileID: 746042875}
-  - {fileID: 1692339264}
+  - {fileID: 960576703}

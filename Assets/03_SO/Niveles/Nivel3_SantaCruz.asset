@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CocinaBoliviana.Data.LevelData
   nombreNivel: Nivel 3 - Santa Cruz
   departamento: {fileID: 11400000, guid: 5a38fa9cd33934e4fa3ccc26b3e19dba, type: 2}
-  duracionNivel: 150
-  objetivoPuntos1Estrella: 120
-  objetivoPuntos2Estrellas: 210
+  duracionNivel: 180
+  objetivoPuntos1Estrella: 110
+  objetivoPuntos2Estrellas: 200
   objetivoPuntos3Estrellas: 300

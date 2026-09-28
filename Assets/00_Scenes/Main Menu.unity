@@ -2615,9 +2615,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CocinaBoliviana.MainMenuController
   gameSceneName: First Scene
   niveles:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 11400000, guid: ddaabf49fbce3494ba344f1ed1eab600, type: 2}
+  - {fileID: 11400000, guid: 363654e693a35fd4ab4329975c705886, type: 2}
+  - {fileID: 11400000, guid: 5c316edea9fd1c24c910c320ea0cdf8b, type: 2}
   nivelPorDefecto: 0
 --- !u!4 &1243618374
 Transform:

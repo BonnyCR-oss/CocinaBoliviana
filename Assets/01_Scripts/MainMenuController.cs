@@ -10,9 +10,6 @@ namespace CocinaBoliviana
 {
     public class MainMenuController : MonoBehaviour
     {
-        [Header("Scene Configuration")]
-        [SerializeField] private string gameSceneName = "First Scene";
-
         [Header("Niveles")]
         [Tooltip("Los niveles jugables, en orden. Todos usan la MISMA escena: lo único que " +
                  "cambia es el departamento y sus reglas.")]
@@ -23,37 +20,50 @@ namespace CocinaBoliviana
 
         public void NuevaPartida()
         {
-            if (niveles != null && nivelPorDefecto >= 0 && nivelPorDefecto < niveles.Length)
+            GameProgressManager.ReiniciarProgreso();
+
+            if (niveles != null && niveles.Length > 0 && niveles[0] != null)
             {
-                LevelSelection.Elegido = niveles[nivelPorDefecto];
+                LevelSelection.Elegido = niveles[0];
             }
 
-            Debug.Log("[MainMenu] Nueva Partida seleccionada -> Cargando escena: " + gameSceneName);
-            SceneManager.LoadScene(gameSceneName);
+            string escena = GameProgressManager.ObtenerNombreEscenaNivel(1);
+            Debug.Log($"[MainMenu] Nueva Partida seleccionada -> Cargando escena: {escena}");
+            SceneManager.LoadScene(escena);
         }
 
         public void ContinuarPartida()
         {
-            Debug.Log("[MainMenu] Continuar Partida seleccionada -> Cargando escena: " + gameSceneName);
-            SceneManager.LoadScene(gameSceneName);
+            int nivelGuardado = GameProgressManager.ObtenerNivelGuardado();
+
+            int indiceNivel = Mathf.Clamp(nivelGuardado - 1, 0, (niveles != null && niveles.Length > 0) ? niveles.Length - 1 : 0);
+            if (niveles != null && indiceNivel < niveles.Length && niveles[indiceNivel] != null)
+            {
+                LevelSelection.Elegido = niveles[indiceNivel];
+            }
+
+            string escena = GameProgressManager.ObtenerNombreEscenaNivel(nivelGuardado);
+            Debug.Log($"[MainMenu] Continuar Partida -> Nivel guardado {nivelGuardado}. Cargando escena: {escena}");
+            SceneManager.LoadScene(escena);
         }
 
         /// <summary>
         /// Elige el nivel y entra. Se engancha a un boton por nivel en el menu: el indice es
-        /// la posicion en la lista 'niveles'.
+        /// la posicion en la lista 'niveles' (0=Cbba, 1=La Paz, 2=Santa Cruz).
         /// </summary>
         public void JugarNivel(int indice)
         {
-            if (niveles == null || indice < 0 || indice >= niveles.Length || niveles[indice] == null)
+            int numeroNivel = indice + 1;
+            GameProgressManager.GuardarNivel(numeroNivel);
+
+            if (niveles != null && indice >= 0 && indice < niveles.Length && niveles[indice] != null)
             {
-                Debug.LogWarning($"[MainMenuController] No hay nivel en el indice {indice}; " +
-                                 "rellena la lista 'Niveles'.");
-                return;
+                LevelSelection.Elegido = niveles[indice];
             }
 
-            LevelSelection.Elegido = niveles[indice];
-            Debug.Log($"[MainMenuController] Nivel elegido: {niveles[indice].nombreNivel}");
-            SceneManager.LoadScene(gameSceneName);
+            string escena = GameProgressManager.ObtenerNombreEscenaNivel(numeroNivel);
+            Debug.Log($"[MainMenuController] Nivel elegido: {numeroNivel} -> Cargando: {escena}");
+            SceneManager.LoadScene(escena);
         }
 
         public void Salir()

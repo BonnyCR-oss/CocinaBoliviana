@@ -25,6 +25,9 @@ namespace CocinaBoliviana
         public static LevelManager Instance { get; private set; }
 
         [Header("Información del Nivel")]
+        [Tooltip("Número de nivel en la campaña (1=Cbba, 2=La Paz, 3=Santa Cruz).")]
+        [SerializeField] private int numeroNivel = 1;
+
         [Tooltip("Nivel por defecto al dar Play directamente en esta escena. Si vienes del " +
                  "menú, manda el que hayas elegido allí.")]
         [SerializeField] private LevelData nivelPorDefecto;
@@ -70,6 +73,7 @@ namespace CocinaBoliviana
         private Coroutine levelLoopRoutine;
 
         // Propiedades de estado
+        public int NumeroNivel => numeroNivel;
         public LevelState Estado { get; private set; } = LevelState.Starting;
         public bool IsPlaying => Estado == LevelState.Playing;
         public float TiempoRestante { get; private set; }
@@ -217,6 +221,12 @@ namespace CocinaBoliviana
             if (NivelSuperado)
             {
                 Sonar(sonidoVictoria != null ? sonidoVictoria : sonidoEntregaExitosa);
+
+                // Si superó el nivel y no es el último, guardar avance para el siguiente nivel
+                if (numeroNivel < GameProgressManager.NivelMaximo)
+                {
+                    GameProgressManager.GuardarNivel(numeroNivel + 1);
+                }
             }
             else
             {
@@ -295,10 +305,26 @@ namespace CocinaBoliviana
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
 
+        public void CargarSiguienteNivel()
+        {
+            Time.timeScale = 1f;
+            int siguiente = numeroNivel + 1;
+            if (siguiente <= GameProgressManager.NivelMaximo)
+            {
+                string escena = GameProgressManager.ObtenerNombreEscenaNivel(siguiente);
+                Debug.Log($"[LevelManager] Avanzando al siguiente nivel ({siguiente}): {escena}");
+                SceneManager.LoadScene(escena);
+            }
+            else
+            {
+                IrAlMenuPrincipal();
+            }
+        }
+
         public void IrAlMenuPrincipal()
         {
             Time.timeScale = 1f;
-            SceneManager.LoadScene("Main Menu");
+            SceneManager.LoadScene(GameProgressManager.EscenaMenuPrincipal);
         }
 
         private void Sonar(AudioClip clip)
