@@ -355,8 +355,40 @@ namespace CocinaBoliviana
 
             if (botonSiguienteNivel != null)
             {
-                // Solo se muestra el botón de siguiente nivel si ganó y no es el último nivel de la campaña
-                botonSiguienteNivel.gameObject.SetActive(victoria && !esUltimoNivel);
+                bool puedeSiguiente = victoria && !esUltimoNivel;
+                botonSiguienteNivel.gameObject.SetActive(puedeSiguiente);
+                if (puedeSiguiente)
+                {
+                    botonSiguienteNivel.onClick.RemoveAllListeners();
+                    botonSiguienteNivel.onClick.AddListener(() =>
+                    {
+                        Debug.Log("[LevelScreenHUD] Click en Botón Siguiente Nivel");
+                        if (lm != null) lm.CargarSiguienteNivel();
+                        else LevelManager.Instance?.CargarSiguienteNivel();
+                    });
+                }
+            }
+
+            if (botonReintentar != null)
+            {
+                botonReintentar.onClick.RemoveAllListeners();
+                botonReintentar.onClick.AddListener(() =>
+                {
+                    Debug.Log("[LevelScreenHUD] Click en Botón Reintentar");
+                    if (lm != null) lm.ReiniciarNivel();
+                    else LevelManager.Instance?.ReiniciarNivel();
+                });
+            }
+
+            if (botonMenuPrincipal != null)
+            {
+                botonMenuPrincipal.onClick.RemoveAllListeners();
+                botonMenuPrincipal.onClick.AddListener(() =>
+                {
+                    Debug.Log("[LevelScreenHUD] Click en Botón Menú Principal");
+                    if (lm != null) lm.IrAlMenuPrincipal();
+                    else LevelManager.Instance?.IrAlMenuPrincipal();
+                });
             }
 
             // Desbloquear cursor para clicks con ratón en simulator
@@ -394,9 +426,10 @@ namespace CocinaBoliviana
                     Debug.Log("[LevelScreenHUD] Atajo de teclado (R/Espacio) -> Reiniciando nivel...");
                     lm.ReiniciarNivel();
                 }
-                else if (Input.GetKeyDown(KeyCode.N) && lm.NivelSuperado && lm.NumeroNivel < GameProgressManager.NivelMaximo)
+                else if ((Input.GetKeyDown(KeyCode.N) || Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)) 
+                    && lm.NivelSuperado && lm.NumeroNivel < GameProgressManager.NivelMaximo)
                 {
-                    Debug.Log("[LevelScreenHUD] Atajo de teclado (N) -> Siguiente nivel...");
+                    Debug.Log("[LevelScreenHUD] Atajo de teclado (N/Enter) -> Siguiente nivel...");
                     lm.CargarSiguienteNivel();
                 }
                 else if (Input.GetKeyDown(KeyCode.M) || Input.GetKeyDown(KeyCode.Escape))

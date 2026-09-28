@@ -137,7 +137,29 @@ namespace CocinaBoliviana
         /// </summary>
         private void AplicarNivel()
         {
-            LevelData nivel = LevelSelection.Elegido ?? nivelPorDefecto;
+            // Determinar qué LevelData corresponde a esta escena:
+            // Si la escena tiene un 'nivelPorDefecto' específico (Nivel 1, Nivel 2 o Nivel 3),
+            // y LevelSelection.Elegido pertenece a otro nivel diferente (por ejemplo, al pasar
+            // de Nivel 1 a Nivel 2 mediante 'Siguiente Nivel'), se sincroniza con el nivel propio de esta escena.
+            LevelData nivel = nivelPorDefecto;
+
+            if (LevelSelection.Elegido != null)
+            {
+                if (nivelPorDefecto == null || LevelSelection.Elegido == nivelPorDefecto)
+                {
+                    nivel = LevelSelection.Elegido;
+                }
+                else
+                {
+                    LevelSelection.Elegido = nivelPorDefecto;
+                    nivel = nivelPorDefecto;
+                }
+            }
+            else
+            {
+                LevelSelection.Elegido = nivelPorDefecto;
+            }
+
             if (nivel == null) return;
 
             nombreNivel = nivel.nombreNivel;
@@ -145,6 +167,11 @@ namespace CocinaBoliviana
             objetivoPuntos1Estrella = nivel.objetivoPuntos1Estrella;
             objetivoPuntos2Estrellas = nivel.objetivoPuntos2Estrellas;
             objetivoPuntos3Estrellas = nivel.objetivoPuntos3Estrellas;
+
+            // Sincronizar número de nivel con el asset activo
+            if (nivel.nombreNivel.Contains("1") || nivel.nombreNivel.Contains("Cochabamba")) numeroNivel = 1;
+            else if (nivel.nombreNivel.Contains("2") || nivel.nombreNivel.Contains("La Paz")) numeroNivel = 2;
+            else if (nivel.nombreNivel.Contains("3") || nivel.nombreNivel.Contains("Santa Cruz")) numeroNivel = 3;
 
             // El departamento se lo pasa al OrderManager, que es de donde lo leen tambien
             // el dispensador de refrescos y las banderas de las paredes.
@@ -154,7 +181,7 @@ namespace CocinaBoliviana
                 if (pedidos != null) pedidos.SetDepartamento(nivel.departamento);
             }
 
-            Debug.Log($"[LevelManager] Nivel cargado: {nombreNivel} " +
+            Debug.Log($"[LevelManager] Nivel cargado: {nombreNivel} (Nivel #{numeroNivel}) " +
                       $"({(nivel.departamento != null ? nivel.departamento.nombre : "sin departamento")}).");
         }
 
@@ -302,6 +329,7 @@ namespace CocinaBoliviana
         public void ReiniciarNivel()
         {
             Time.timeScale = 1f;
+            LevelSelection.Elegido = nivelPorDefecto;
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
 
@@ -311,12 +339,19 @@ namespace CocinaBoliviana
             int siguiente = numeroNivel + 1;
             if (siguiente <= GameProgressManager.NivelMaximo)
             {
+                // Guardar avance en progreso persistente
+                GameProgressManager.GuardarNivel(siguiente);
+
+                // Limpiar la referencia estática previa para que la nueva escena tome limpiamente su nivel
+                LevelSelection.Elegido = null;
+
                 string escena = GameProgressManager.ObtenerNombreEscenaNivel(siguiente);
-                Debug.Log($"[LevelManager] Avanzando al siguiente nivel ({siguiente}): {escena}");
+                Debug.Log($"[LevelManager] Avanzando al siguiente nivel ({siguiente}): '{escena}'");
                 SceneManager.LoadScene(escena);
             }
             else
             {
+                LevelSelection.Elegido = null;
                 IrAlMenuPrincipal();
             }
         }
@@ -324,6 +359,7 @@ namespace CocinaBoliviana
         public void IrAlMenuPrincipal()
         {
             Time.timeScale = 1f;
+            LevelSelection.Elegido = null;
             SceneManager.LoadScene(GameProgressManager.EscenaMenuPrincipal);
         }
 

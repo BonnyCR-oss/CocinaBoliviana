@@ -71,6 +71,12 @@ namespace CocinaBoliviana
 
             PararChorro();
             ReponerVaso();
+
+            DishData rInicial = RefrescoDelNivel();
+            if (rInicial != null)
+            {
+                TenirChorro(ColorDe(rInicial));
+            }
         }
 
         /// <summary>Deja un vaso limpio en el porta-vasos.</summary>
@@ -286,22 +292,40 @@ namespace CocinaBoliviana
 
         /// <summary>
         /// Color del liquido de esta bebida. Lo trae el propio DishData, asi que el
-        /// mocochinchi y el somo caen de su color sin tocar nada aqui.
-        /// </summary>
         private static Color ColorDe(DishData refresco)
         {
-            return refresco.colorLiquido;
+            if (refresco != null)
+            {
+                string n = (refresco.name + " " + (refresco.nombre ?? "")).ToLowerInvariant();
+                if (n.Contains("moccochinchi") || n.Contains("mocochinchi"))
+                {
+                    // Café claro ámbar tradicional del mocochinchi (Cochabamba y La Paz)
+                    return new Color(0.58f, 0.35f, 0.16f, 0.90f);
+                }
+                if (n.Contains("zomo") || n.Contains("somo"))
+                {
+                    // Amarillo crema claro típico del somó cruceño (Santa Cruz)
+                    return new Color(0.96f, 0.90f, 0.58f, 0.90f);
+                }
+                return refresco.colorLiquido;
+            }
+
+            // Fallback según la escena activa si no hay objeto asignado
+            string sName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.ToLowerInvariant();
+            if (sName.Contains("santa cruz") || sName.Contains("scrz"))
+            {
+                return new Color(0.96f, 0.90f, 0.58f, 0.90f); // Santa Cruz -> Somó
+            }
+            return new Color(0.58f, 0.35f, 0.16f, 0.90f); // Cochabamba y La Paz -> Mocochinchi
         }
 
-        /// <summary>Tine el chorro con el color de la bebida en curso.</summary>
+        /// <summary>Tiñe el chorro con el color de la bebida en curso.</summary>
         private void TenirChorro(Color color)
         {
             if (chorro == null) return;
 
             var main = chorro.main;
-            // Se conserva el alfa que trae el sistema: el chorro va semitransparente.
-            float alfa = main.startColor.color.a;
-            main.startColor = new Color(color.r, color.g, color.b, alfa);
+            main.startColor = new Color(color.r, color.g, color.b, 0.85f);
         }
 
         private void ArrancarChorro()

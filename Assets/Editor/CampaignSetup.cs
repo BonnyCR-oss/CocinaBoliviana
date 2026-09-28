@@ -213,6 +213,10 @@ namespace CocinaBoliviana.Editor
             SetCrateIngredients("Cajon_Carne", carneIngr);
             SetCrateIngredients("Cajon_Verduras", verdurasIngr);
 
+            // 5. Aplicar mejoras estéticas de extractores, campana e iluminación de entrega
+            KitchenVisualsSetup.AsegurarMateriales();
+            KitchenVisualsSetup.AplicarVisualesEnEscena(scene);
+
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
             Debug.Log($"[CampaignSetup] Escena '{scene.name}' guardada correctamente.");
