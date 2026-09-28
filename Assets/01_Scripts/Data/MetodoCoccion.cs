@@ -4,7 +4,10 @@ namespace CocinaBoliviana.Data
     public enum MetodoCoccion
     {
         Hervir,
-        Freir
+        Freir,
+
+        /// <summary>Parrilla. En la cocina boliviana, el sonso cruceno.</summary>
+        Asar
     }
 
     /// <summary>

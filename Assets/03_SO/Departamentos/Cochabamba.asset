@@ -15,5 +15,7 @@ MonoBehaviour:
   nombre: Cochabamba
   comidas:
   - {fileID: 11400000, guid: 067a998a0d3578db5aaf13bdc233f576, type: 2}
-  refrescos: []
+  - {fileID: 11400000, guid: f34a678b0eb665948a79f9128c10b643, type: 2}
+  refrescos:
+  - {fileID: 11400000, guid: 0ca51637ae4bdd842b4982b81231c7ee, type: 2}
   pedidos: []

@@ -24,6 +24,8 @@ namespace CocinaBoliviana.Editor
         {
             ("olla", MetodoCoccion.Hervir),
             ("sarten", MetodoCoccion.Freir),
+            // La parrilla solo sirve para asar: de momento, el sonso cruceno.
+            ("ParrillaModel", MetodoCoccion.Asar),
         };
 
         /// <summary>

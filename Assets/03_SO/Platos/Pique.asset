@@ -14,16 +14,32 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CocinaBoliviana.Data.DishData
   nombre: Pique
   icono: {fileID: 21300000, guid: 6bdf55c00d0d6754c8561b1d994ea3c4, type: 3}
-  platoPrefab: {fileID: 4442107989209651462, guid: 5eea0d939051b24429c1de94e5c8ebe6, type: 3}
+  platoPrefab: {fileID: 2043088132430308328, guid: b8e20032b2a2f0d43bceb74aea404338, type: 3}
   receta:
   - ingrediente: {fileID: 11400000, guid: da37c04e5e709d7d2ab901859c7c7917, type: 2}
     corte: 2
     debeEstarCocido: 1
-    metodo: 1
+    metodo: 0
   - ingrediente: {fileID: 11400000, guid: 1893d54cffd80fa8b9d3529c8eea39b7, type: 2}
     corte: 3
     debeEstarCocido: 1
     metodo: 1
+  - ingrediente: {fileID: 11400000, guid: a577d089357d0bc0c9c0b4e3c4bb046e, type: 2}
+    corte: 0
+    debeEstarCocido: 1
+    metodo: 0
+  - ingrediente: {fileID: 11400000, guid: 82272100148539be6965d91b1ac289a9, type: 2}
+    corte: 1
+    debeEstarCocido: 0
+    metodo: 0
+  - ingrediente: {fileID: 11400000, guid: 8468b62a8bce9d70f90e56584c591cfc, type: 2}
+    corte: 1
+    debeEstarCocido: 0
+    metodo: 0
+  - ingrediente: {fileID: 11400000, guid: 70c2ec4bd13c0d14fac7583febf90db6, type: 2}
+    corte: 1
+    debeEstarCocido: 1
+    metodo: 0
   ingredientesRequeridos: []
-  tiempoLimite: 80
-  puntos: 30
+  tiempoLimite: 50
+  puntos: 35

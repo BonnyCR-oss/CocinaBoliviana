@@ -25,7 +25,9 @@ namespace CocinaBoliviana.Editor
 
             List<DishData> recetas = CargarRecetas();
             MigrarRecetas(recetas);
-            PrepararPrefabsServidos(recetas);
+            // Los refrescos tambien necesitan poder agarrarse y entregarse, aunque no se
+            // armen en el plato: por eso van aparte de 'recetas'.
+            PrepararPrefabsServidos(CargarTodoLoServible());
             if (recetas.Count == 0)
             {
                 Debug.LogWarning($"[PlatingSetup] No hay ningún DishData en {DishesFolder}. " +
@@ -206,6 +208,19 @@ namespace CocinaBoliviana.Editor
                     continue;
                 }
 
+                // Si ya apunta a un prefab tuyo, se completa ESE en su sitio. Duplicarlo
+                // dejaria dos copias y te obligaria a mantener la buena.
+                string yaEs = AssetDatabase.GetAssetPath(plato.platoPrefab);
+                if (yaEs.EndsWith(".prefab"))
+                {
+                    using (var propio = new PrefabUtility.EditPrefabContentsScope(yaEs))
+                    {
+                        ConfigurarPlatoServido(propio.prefabContentsRoot, plato);
+                    }
+                    Debug.Log($"[PlatingSetup] '{plato.nombre}': completado tu prefab {System.IO.Path.GetFileName(yaEs)}.");
+                    continue;
+                }
+
                 string destino = $"{ServidosFolder}/{plato.nombre}_Servido.prefab";
 
                 if (AssetDatabase.LoadAssetAtPath<GameObject>(destino) == null)
@@ -232,13 +247,16 @@ namespace CocinaBoliviana.Editor
 
         private static void ConfigurarPlatoServido(GameObject root, DishData plato)
         {
+            // Solo se crea si falta: estos pueden ser prefabs tuyos con el collider ya
+            // ajustado a mano, y no hay que pisarlos.
             var col = root.GetComponent<BoxCollider>();
-            if (col == null) col = root.AddComponent<BoxCollider>();
+            bool colliderNuevo = col == null;
+            if (colliderNuevo) col = root.AddComponent<BoxCollider>();
 
             // Caja ajustada a la malla: el modelo ya trae el plato, así que esto envuelve
             // el conjunto entero y se puede apuntar desde cualquier lado.
             var renderers = root.GetComponentsInChildren<Renderer>(true);
-            if (renderers.Length > 0)
+            if (colliderNuevo && renderers.Length > 0)
             {
                 Bounds mundo = renderers[0].bounds;
                 for (int i = 1; i < renderers.Length; i++) mundo.Encapsulate(renderers[i].bounds);
@@ -250,14 +268,17 @@ namespace CocinaBoliviana.Editor
                     mundo.size.y / Mathf.Max(Mathf.Abs(lossy.y), 0.0001f),
                     mundo.size.z / Mathf.Max(Mathf.Abs(lossy.z), 0.0001f));
             }
-            col.isTrigger = false;
+            if (colliderNuevo) col.isTrigger = false;
 
             var rb = root.GetComponent<Rigidbody>();
-            if (rb == null) rb = root.AddComponent<Rigidbody>();
-            rb.mass = 0.9f;
-            rb.angularDamping = 6f;
-            rb.linearDamping = 0.6f;
-            rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+            if (rb == null)
+            {
+                rb = root.AddComponent<Rigidbody>();
+                rb.mass = 0.9f;
+                rb.angularDamping = 6f;
+                rb.linearDamping = 0.6f;
+                rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+            }
 
             if (root.GetComponent<XRGrabInteractable>() == null)
             {
@@ -269,6 +290,26 @@ namespace CocinaBoliviana.Editor
             var so = new SerializedObject(marca);
             so.FindProperty("plato").objectReferenceValue = plato;
             so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private const string RefrescosFolder = "Assets/03_SO/Refresco";
+
+        /// <summary>
+        /// Platos Y refrescos: todo lo que el jugador acaba llevando en la mano y dejando en
+        /// la entrega. Los refrescos no entran en 'recetasConocidas' del plato porque no se
+        /// emplatan, pero si necesitan su XRGrabInteractable y su ServedDish.
+        /// </summary>
+        private static List<DishData> CargarTodoLoServible()
+        {
+            var todo = CargarRecetas();
+            if (!AssetDatabase.IsValidFolder(RefrescosFolder)) return todo;
+
+            foreach (string guid in AssetDatabase.FindAssets("t:DishData", new[] { RefrescosFolder }))
+            {
+                var d = AssetDatabase.LoadAssetAtPath<DishData>(AssetDatabase.GUIDToAssetPath(guid));
+                if (d != null && !todo.Contains(d)) todo.Add(d);
+            }
+            return todo;
         }
 
         private static List<DishData> CargarRecetas()

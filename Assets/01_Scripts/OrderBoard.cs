@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using CocinaBoliviana.Data;
 
 namespace CocinaBoliviana
@@ -17,8 +18,8 @@ namespace CocinaBoliviana
     {
         [SerializeField] private RectTransform contenedor;
         [SerializeField] private GameObject plantillaTicket;
-        [SerializeField] private Text textoPuntos;
-        [SerializeField] private Text textoVacio;
+        [SerializeField] private TextMeshProUGUI textoPuntos;
+        [SerializeField] private TextMeshProUGUI textoVacio;
 
         [Header("Colores del tiempo")]
         [SerializeField] private Color colorTranquilo = new Color(0.35f, 0.85f, 0.4f);
@@ -127,7 +128,7 @@ namespace CocinaBoliviana
                     icono.color = hecho ? new Color(1f, 1f, 1f, 0.35f) : Color.white;
                 }
 
-                var etiqueta = t.Find("Texto")?.GetComponent<Text>();
+                var etiqueta = t.Find("Texto")?.GetComponent<TextMeshProUGUI>();
                 if (etiqueta != null)
                 {
                     string marca = hecho ? "✓  " : "";
@@ -138,13 +139,20 @@ namespace CocinaBoliviana
                 }
             }
 
+            float p = pedido.Progreso;
+            Color color = (p > 0.5f) ? colorTranquilo : (p > 0.2f) ? colorApurado : colorCritico;
+
             var barra = ticket.transform.Find("Barra/Relleno")?.GetComponent<Image>();
             if (barra != null)
             {
-                float p = pedido.Progreso;
                 barra.fillAmount = p;
-                barra.color = (p > 0.5f) ? colorTranquilo : (p > 0.2f) ? colorApurado : colorCritico;
+                barra.color = color;
             }
+
+            // Franja lateral del mismo color: se ve la urgencia de un vistazo aunque no
+            // llegues a leer la barra fina.
+            var franja = ticket.transform.Find("Franja")?.GetComponent<Image>();
+            if (franja != null) franja.color = color;
         }
     }
 }

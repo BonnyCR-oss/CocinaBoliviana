@@ -42,8 +42,20 @@ namespace CocinaBoliviana
             if (campana != null) campanaEnReposo = campana.localPosition;
         }
 
+        /// <summary>
+        /// Cada cuanto se sondea la fisica. A 50/s (cada FixedUpdate) esto alocaba un array
+        /// nuevo 50 veces por segundo POR componente, y con varias estaciones a la vez se
+        /// notaba en los FPS. 10/s es imperceptible para dejar un objeto encima.
+        /// </summary>
+        private const float IntervaloSondeo = 0.1f;
+
+        private float proximoSondeo;
+
         private void FixedUpdate()
         {
+            if (Time.time < proximoSondeo) return;
+            proximoSondeo = Time.time + IntervaloSondeo;
+
             Vector3 centro = transform.position + Vector3.up * zonaAltura;
             Collider[] dentro = Physics.OverlapBox(centro, zonaDeteccion * 0.5f, transform.rotation,
                                                    ~0, QueryTriggerInteraction.Ignore);

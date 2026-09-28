@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3aec717ffec41b1fe89c357673e7ea44, type: 3}
+  m_Name: "PlatoPace\xF1o"
+  m_EditorClassIdentifier: Assembly-CSharp::CocinaBoliviana.Data.DishData
+  nombre: "Plato Pace\xF1o"
+  icono: {fileID: 0}
+  platoPrefab: {fileID: 3465895440945880961, guid: 02998d548e35a30489676ce794b5204b, type: 3}
+  receta: []
+  ingredientesRequeridos: []
+  tiempoLimite: 50
+  puntos: 35

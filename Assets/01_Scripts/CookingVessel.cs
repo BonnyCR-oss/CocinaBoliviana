@@ -57,8 +57,20 @@ namespace CocinaBoliviana
             Cocinar();
         }
 
+        /// <summary>
+        /// Cada cuanto se sondea la fisica. A 50/s (cada FixedUpdate) esto alocaba un array
+        /// nuevo 50 veces por segundo POR componente, y con varias estaciones a la vez se
+        /// notaba en los FPS. 10/s es imperceptible para dejar un objeto encima.
+        /// </summary>
+        private const float IntervaloSondeo = 0.1f;
+
+        private float proximoSondeo;
+
         private void RecogerIngredientes()
         {
+            if (Time.time < proximoSondeo) return;
+            proximoSondeo = Time.time + IntervaloSondeo;
+
             if (EstaLleno) return;
 
             Vector3 centro = transform.position + Vector3.up * zonaAltura;
