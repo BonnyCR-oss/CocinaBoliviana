@@ -20,6 +20,6 @@ MonoBehaviour:
   cortesDisponibles: []
   cortarSoloCocido: 0
   metodosCoccion: 02000000
-  tiempoCoccion: 12
+  tiempoCoccion: 5
   margenAntesDeQuemarse: 5
   resultadosCoccion: []

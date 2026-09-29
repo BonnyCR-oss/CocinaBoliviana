@@ -15,7 +15,7 @@ MonoBehaviour:
   nombreNivel: Nivel 1 - Cochabamba
   numeroNivel: 1
   departamento: {fileID: 11400000, guid: dfb82a7404f21ee85ac3e6fb680b5583, type: 2}
-  duracionNivel: 20
-  objetivoPuntos1Estrella: 1
-  objetivoPuntos2Estrellas: 2
-  objetivoPuntos3Estrellas: 4
+  duracionNivel: 330
+  objetivoPuntos1Estrella: 60
+  objetivoPuntos2Estrellas: 110
+  objetivoPuntos3Estrellas: 170

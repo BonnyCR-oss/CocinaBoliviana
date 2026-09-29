@@ -12843,11 +12843,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CocinaBoliviana.OrderManager
   departamento: {fileID: 11400000, guid: d8d29651999c18b41839b43d0077685e, type: 2}
-  maxPedidosActivos: 4
-  segundosEntrePedidos: 35
-  primerPedidoTrasSegundos: 10
-  tiempoPorDefecto: 120
-  maxElementosPorPedido: 2
+  maxPedidosActivos: 2
+  segundosEntrePedidos: 45
+  primerPedidoTrasSegundos: 5
+  tiempoPorDefecto: 180
+  maxElementosPorPedido: 1
   tablero: {fileID: 746042871}
   sonidoNuevoPedido: {fileID: 8300000, guid: 8ba8e5c116681694a8d834e596b2a092, type: 3}
   volumenNuevoPedido: 0.9

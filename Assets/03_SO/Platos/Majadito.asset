@@ -35,5 +35,5 @@ MonoBehaviour:
   entregaDirecta: 0
   ingredientesRequeridos: []
   colorLiquido: {r: 0.78, g: 0.45, b: 0.12, a: 1}
-  tiempoLimite: 110
+  tiempoLimite: 170
   puntos: 55

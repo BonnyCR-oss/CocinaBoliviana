@@ -18,6 +18,8 @@ MonoBehaviour:
   sePuedeCortar: 0
   sePuedeCocinar: 1
   cortesDisponibles: []
+  cortarSoloCocido: 0
   metodosCoccion: 01000000
-  tiempoCoccion: 10
+  tiempoCoccion: 3
   margenAntesDeQuemarse: 6
+  resultadosCoccion: []

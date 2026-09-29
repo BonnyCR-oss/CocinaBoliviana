@@ -24,6 +24,6 @@ MonoBehaviour:
     prefabResultado: {fileID: 6837301637760212295, guid: 820810ca85a1ff542a8abdf1771dd75f, type: 3}
   cortarSoloCocido: 0
   metodosCoccion: 0000000001000000
-  tiempoCoccion: 10
+  tiempoCoccion: 3
   margenAntesDeQuemarse: 7
   resultadosCoccion: []
