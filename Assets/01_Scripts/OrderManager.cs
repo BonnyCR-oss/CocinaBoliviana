@@ -55,6 +55,16 @@ namespace CocinaBoliviana
         [Header("Referencias")]
         [SerializeField] private OrderBoard tablero;
 
+        [Header("Sonido")]
+        [Tooltip("Suena cada vez que entra un pedido nuevo al tablero. Sale desde el tablero, " +
+                 "para que el jugador sepa hacia dónde mirar.")]
+        [SerializeField] private AudioClip sonidoNuevoPedido;
+
+        [SerializeField, Range(0f, 1f)] private float volumenNuevoPedido = 0.9f;
+
+        private const string RutaSonidoNuevoPedido = "Assets/06_SFX/SonidoNuevoPedido.mp3";
+        private AudioSource fuenteAviso;
+
         private readonly List<PedidoActivo> activos = new List<PedidoActivo>();
         private float proximoPedido;
         private float proximoRefresco;
@@ -91,6 +101,14 @@ namespace CocinaBoliviana
 
         private void Awake()
         {
+#if UNITY_EDITOR
+            // Para probar sin tener que asignarlo antes. En una build hace falta que esté
+            // asignado en la escena: lo hace 'Kitchen > Niveles > Asignar sonido de nuevo pedido'.
+            if (sonidoNuevoPedido == null)
+            {
+                sonidoNuevoPedido = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>(RutaSonidoNuevoPedido);
+            }
+#endif
             cache = this;
             proximoPedido = primerPedidoTrasSegundos;
             puntosInternos = 0;
@@ -185,7 +203,26 @@ namespace CocinaBoliviana
             pedido.Pendientes.AddRange(pedido.Todos);
 
             activos.Add(pedido);
+            AvisarNuevoPedido();
             Debug.Log($"[OrderManager] Nuevo pedido: {Describir(pedido)} ({pedido.TiempoTotal:0}s)");
+        }
+
+        private void AvisarNuevoPedido()
+        {
+            if (sonidoNuevoPedido == null) return;
+
+            if (fuenteAviso == null)
+            {
+                GameObject donde = (tablero != null) ? tablero.gameObject : gameObject;
+                fuenteAviso = donde.AddComponent<AudioSource>();
+                fuenteAviso.playOnAwake = false;
+                // Medio 3D: se oye en toda la cocina pero se nota que viene del tablero.
+                fuenteAviso.spatialBlend = 0.6f;
+                fuenteAviso.minDistance = 2f;
+                fuenteAviso.maxDistance = 15f;
+            }
+
+            fuenteAviso.PlayOneShot(sonidoNuevoPedido, volumenNuevoPedido);
         }
 
         private void ArmarPedidoAlAzar(PedidoActivo pedido)

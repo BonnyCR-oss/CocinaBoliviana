@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: Nivel2_LaPaz
   m_EditorClassIdentifier: Assembly-CSharp::CocinaBoliviana.Data.LevelData
   nombreNivel: Nivel 2 - La Paz
+  numeroNivel: 2
   departamento: {fileID: 11400000, guid: d8d29651999c18b41839b43d0077685e, type: 2}
   duracionNivel: 180
-  objetivoPuntos1Estrella: 100
-  objetivoPuntos2Estrellas: 190
-  objetivoPuntos3Estrellas: 280
+  objetivoPuntos1Estrella: 3
+  objetivoPuntos2Estrellas: 5
+  objetivoPuntos3Estrellas: 7

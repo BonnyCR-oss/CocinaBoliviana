@@ -59,9 +59,9 @@ namespace CocinaBoliviana.Editor
                 nombreNivel: "Nivel 1 - Cochabamba",
                 nivelDataPath: Nivel1DataPath,
                 deptoDataPath: CbbaDeptoPath,
-                papasIngr: new[] { "Papa", "Arroz" },
-                carneIngr: new[] { "Carne", "Chorizo", "Huevo" },
-                verdurasIngr: new[] { "Tomate", "Cebolla" },
+                papasIngr: new[] { "Arroz" },
+                carneIngr: new[] { "Carne", "Chorizo", "Huevo", "Apanado" },
+                verdurasIngr: new[] { "Tomate", "Cebolla", "Papa" },
                 levelManagerPrefab: levelManagerPrefab
             );
 
@@ -73,9 +73,9 @@ namespace CocinaBoliviana.Editor
                 nombreNivel: "Nivel 2 - La Paz",
                 nivelDataPath: Nivel2DataPath,
                 deptoDataPath: LaPazDeptoPath,
-                papasIngr: new[] { "Papa", "Haba" },
-                carneIngr: new[] { "Carne", "Queso" },
-                verdurasIngr: new[] { "Tomate", "Cebolla" },
+                papasIngr: new[] { "Queso" },
+                carneIngr: new[] { "Carne" },
+                verdurasIngr: new[] { "Choclo", "Haba", "Papa" },
                 levelManagerPrefab: levelManagerPrefab
             );
 
@@ -88,8 +88,8 @@ namespace CocinaBoliviana.Editor
                 nivelDataPath: Nivel3DataPath,
                 deptoDataPath: SantaCruzDeptoPath,
                 papasIngr: new[] { "Arroz", "SonsoCrudo" },
-                carneIngr: new[] { "Carne", "Huevo", "Queso" },
-                verdurasIngr: new[] { "Tomate", "Cebolla" },
+                carneIngr: new[] { "Huevo", "Charque" },
+                verdurasIngr: new[] { "PlatanoFreir" },
                 levelManagerPrefab: levelManagerPrefab
             );
 
@@ -101,9 +101,9 @@ namespace CocinaBoliviana.Editor
                 nombreNivel: "Nivel 1 - Cochabamba",
                 nivelDataPath: Nivel1DataPath,
                 deptoDataPath: CbbaDeptoPath,
-                papasIngr: new[] { "Papa", "Arroz" },
-                carneIngr: new[] { "Carne", "Chorizo", "Huevo" },
-                verdurasIngr: new[] { "Tomate", "Cebolla" },
+                papasIngr: new[] { "Arroz" },
+                carneIngr: new[] { "Carne", "Chorizo", "Huevo", "Apanado" },
+                verdurasIngr: new[] { "Tomate", "Cebolla", "Papa" },
                 levelManagerPrefab: levelManagerPrefab
             );
 
@@ -208,7 +208,10 @@ namespace CocinaBoliviana.Editor
                 soWf.ApplyModifiedPropertiesWithoutUndo();
             }
 
-            // 4. Configurar opciones de dispensadores de cajones
+            // 4. Configurar opciones de dispensadores de cajones.
+            //    OJO: esto REEMPLAZA la lista de cada cajón. Las listas de RunAll tienen que
+            //    coincidir con lo que piden las recetas de cada departamento; si cambias un
+            //    cajón a mano en la escena, cámbialo también aquí o se perderá al re-correr.
             SetCrateIngredients("Cajon_Papas", papasIngr);
             SetCrateIngredients("Cajon_Carne", carneIngr);
             SetCrateIngredients("Cajon_Verduras", verdurasIngr);

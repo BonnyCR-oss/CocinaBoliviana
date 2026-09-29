@@ -140,6 +140,9 @@ namespace CocinaBoliviana.Editor
                 plato.platoPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(ServidoPrefabPath);
             }
 
+            // El sonso asado se lleva tal cual al mostrador, sin emplatar.
+            plato.entregaDirecta = true;
+
             if (plato.tiempoLimite <= 0f) plato.tiempoLimite = 60f;
             if (plato.puntos <= 0) plato.puntos = 30;
 

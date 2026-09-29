@@ -14,7 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CocinaBoliviana.Data.DepartmentData
   nombre: Santa Cruz
   bandera: {fileID: 21300000, guid: 2a2e473f14716b8419752e5f8a8c342b, type: 3}
-  comidas: []
+  comidas:
+  - {fileID: 11400000, guid: 1e52b21af1d80c744979d0a33270765c, type: 2}
+  - {fileID: 11400000, guid: bfba768725e28794b92dc6201866c2a8, type: 2}
   refrescos:
   - {fileID: 11400000, guid: 44222574c25696e4ca6e4ae68dddba9d, type: 2}
   pedidos: []

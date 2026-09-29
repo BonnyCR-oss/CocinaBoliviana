@@ -65,6 +65,11 @@ namespace CocinaBoliviana.Data
         [Header("Receta")]
         public List<IngredienteRequerido> receta = new List<IngredienteRequerido>();
 
+        [Tooltip("Se entrega tal cual sale de la estación, sin pasar por el plato de emplatado. " +
+                 "Es el sonso: el mismo que sale de la parrilla, ya asado, va directo al mostrador. " +
+                 "La receta debe tener UN solo ingrediente, en el estado en que se entrega.")]
+        public bool entregaDirecta;
+
         [HideInInspector]
         [Tooltip("Legado. Solo sirve para migrar a 'receta'; no lo edites.")]
         public List<IngredientData> ingredientesRequeridos = new List<IngredientData>();

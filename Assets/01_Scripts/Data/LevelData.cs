@@ -12,6 +12,10 @@ namespace CocinaBoliviana.Data
         [Header("Identidad")]
         public string nombreNivel = "Nivel 1 - Cochabamba";
 
+        [Tooltip("Posición en la campaña: 1 = Cochabamba, 2 = La Paz, 3 = Santa Cruz. De aquí " +
+                 "salen el guardado, los récords y qué escena viene después.")]
+        public int numeroNivel = 1;
+
         [Tooltip("De aquí salen el menú de pedidos, el refresco del dispensador y la bandera " +
                  "de las paredes.")]
         public DepartmentData departamento;

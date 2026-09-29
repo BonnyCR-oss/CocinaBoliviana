@@ -74,8 +74,11 @@ namespace CocinaBoliviana.Editor
                 },
                 new IngredienteSpec
                 {
+                    // Sale con cáscara. En el sartén se vuelve HuevoEstrellado y en la olla
+                    // HuevoHervido (ver 'Resultados Coccion' del asset); solo el hervido se pica.
                     ingredientDataPath = "Assets/03_SO/Ingredientes/Huevo.asset",
-                    prefabPath = $"{PrefabsFolder}/huevo.prefab",
+                    prefabPath = $"{PrefabsFolder}/huevoCascaron.prefab",
+                    cortes = { new CorteSpec { tipo = TipoCorte.Cubitos, prefabPath = $"{PrefabsFolder}/HuevoHervidoPicado.prefab" } }
                 },
                 // Sonso crudo para la parrilla; GrillSetup completa sus datos de cocción.
                 new IngredienteSpec
@@ -111,6 +114,8 @@ namespace CocinaBoliviana.Editor
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+
+            ConfigurarPrefabsDeclarados(specs);
 
             MarcarCortesDeclarados();
 
@@ -268,6 +273,52 @@ namespace CocinaBoliviana.Editor
                               $"marcado como corte {corte.tipo} de {data.nombre}.");
                 }
             }
+        }
+
+        /// <summary>
+        /// Configura el prefab de CADA IngredientData, no solo los de la lista fija 'specs'.
+        ///
+        /// Los ingredientes nuevos hechos a mano (plátano, charque, apanado, choclo...) se
+        /// quedaban con el Rigidbody por defecto: sin interpolación (se ven a saltos al
+        /// moverse), masa 1 y casi sin freno de giro (ruedan sin parar) y el IngredientItem
+        /// llamándose "Tomate". Así basta con asignar el prefab en su IngredientData.
+        /// </summary>
+        private static void ConfigurarPrefabsDeclarados(List<IngredienteSpec> yaHechos)
+        {
+            var hechos = new HashSet<string>();
+            foreach (var spec in yaHechos) hechos.Add(spec.prefabPath);
+
+            foreach (string guid in AssetDatabase.FindAssets("t:IngredientData"))
+            {
+                var data = AssetDatabase.LoadAssetAtPath<IngredientData>(AssetDatabase.GUIDToAssetPath(guid));
+                if (data == null) continue;
+
+                // Los resultados de cocción (huevo estrellado, huevo duro) también son
+                // ingredientes agarrables del mismo dato.
+                if (data.resultadosCoccion != null)
+                {
+                    foreach (var r in data.resultadosCoccion)
+                    {
+                        if (r == null || r.prefabResultado == null) continue;
+                        string rutaResultado = AssetDatabase.GetAssetPath(r.prefabResultado);
+                        if (!rutaResultado.EndsWith(".prefab") || hechos.Contains(rutaResultado)) continue;
+                        EnsureIngredientPrefab(rutaResultado, data, isCut: false);
+                        hechos.Add(rutaResultado);
+                    }
+                }
+
+                if (data.prefab == null) continue;
+
+                string ruta = AssetDatabase.GetAssetPath(data.prefab);
+                if (string.IsNullOrEmpty(ruta) || !ruta.EndsWith(".prefab") || hechos.Contains(ruta)) continue;
+
+                EnsureIngredientPrefab(ruta, data, isCut: false);
+                hechos.Add(ruta);
+                Debug.Log($"[IngredientPrefabSetup] '{System.IO.Path.GetFileNameWithoutExtension(ruta)}' " +
+                          $"configurado como {data.nombre}.");
+            }
+
+            AssetDatabase.SaveAssets();
         }
 
         private static void ClearLegacyCuttingBoardRefs()

@@ -17,7 +17,15 @@ MonoBehaviour:
   prefab: {fileID: 2152278373185856053, guid: 6cc9cf83fd585ffdc9fec13fc26decee, type: 3}
   sePuedeCortar: 1
   sePuedeCocinar: 1
-  cortesDisponibles: []
+  cortesDisponibles:
+  - tipo: 2
+    prefabResultado: {fileID: 2467468792648670188, guid: 8569aa43d58ca6c4f975f14c857f49c1, type: 3}
+  cortarSoloCocido: 1
   metodosCoccion: 0000000001000000
   tiempoCoccion: 6
   margenAntesDeQuemarse: 4
+  resultadosCoccion:
+  - metodo: 1
+    prefabResultado: {fileID: 1130464694192986417, guid: 452a024adb731ba8ea1641aa9f6302b7, type: 3}
+  - metodo: 0
+    prefabResultado: {fileID: 7004261751852898849, guid: 5eacad6d30caa3848acffa0645449b94, type: 3}
