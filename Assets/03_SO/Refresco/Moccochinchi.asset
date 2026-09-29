@@ -16,7 +16,8 @@ MonoBehaviour:
   icono: {fileID: 21300000, guid: 7501da3a03cd78649a229e00994eae5b, type: 3}
   platoPrefab: {fileID: 3937641919549609138, guid: 218133674f2f3c6418862022a78c617d, type: 3}
   receta: []
+  entregaDirecta: 0
   ingredientesRequeridos: []
   colorLiquido: {r: 0.58, g: 0.35, b: 0.16, a: 0.9}
-  tiempoLimite: 20
-  puntos: 15
+  tiempoLimite: 25
+  puntos: 20

@@ -200,8 +200,8 @@ namespace CocinaBoliviana
 
             var rt = canvasGo.GetComponent<RectTransform>();
             rt.sizeDelta = new Vector2(860f, 920f);
-            canvasGo.transform.position = new Vector3(1.90f, 2.05f, 2.82f);
-            canvasGo.transform.rotation = Quaternion.identity;
+            canvasGo.transform.position = new Vector3(-4.847f, 1.862f, 1.952f);
+            canvasGo.transform.rotation = Quaternion.Euler(0f, -90f, 0f);
             canvasGo.transform.localScale = Vector3.one * 0.0018f;
 
             // Fondo

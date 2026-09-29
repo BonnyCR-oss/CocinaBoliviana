@@ -32,7 +32,8 @@ MonoBehaviour:
     corte: 3
     debeEstarCocido: 1
     metodo: 1
+  entregaDirecta: 0
   ingredientesRequeridos: []
   colorLiquido: {r: 0.78, g: 0.45, b: 0.12, a: 1}
-  tiempoLimite: 85
+  tiempoLimite: 110
   puntos: 55

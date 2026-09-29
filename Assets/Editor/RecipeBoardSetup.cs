@@ -79,9 +79,9 @@ namespace CocinaBoliviana.Editor
 
             var rt = canvasGo.GetComponent<RectTransform>();
             rt.sizeDelta = new Vector2(AnchoTablero, AltoTablero);
-            // Symmetrical to TableroDePedidos at (-2.91, 2.05, 2.82)
-            canvasGo.transform.position = new Vector3(1.90f, 2.05f, 2.82f);
-            canvasGo.transform.rotation = Quaternion.identity; // Looking South into the kitchen towards player
+            // Position on West Wall
+            canvasGo.transform.position = new Vector3(-4.847f, 1.862f, 1.952f);
+            canvasGo.transform.rotation = Quaternion.Euler(0f, -90f, 0f); // Looking East into the kitchen towards player
             canvasGo.transform.localScale = Vector3.one * 0.0018f;
 
             // Panel de Fondo oscuro
