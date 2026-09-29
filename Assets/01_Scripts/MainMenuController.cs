@@ -11,12 +11,30 @@ namespace CocinaBoliviana
     public class MainMenuController : MonoBehaviour
     {
         [Header("Niveles")]
-        [Tooltip("Los niveles jugables, en orden. Todos usan la MISMA escena: lo único que " +
-                 "cambia es el departamento y sus reglas.")]
+        [Tooltip("Los niveles jugables, en orden: 0 = Cochabamba, 1 = La Paz, 2 = Santa Cruz. " +
+                 "Cada uno tiene su propia escena.")]
         [SerializeField] private LevelData[] niveles;
 
         [Tooltip("Cuál se carga con 'Nueva Partida'. 0 = el primero de la lista.")]
         [SerializeField] private int nivelPorDefecto;
+
+        [Header("Botones")]
+        [Tooltip("Se oculta si todavía no hay ninguna partida guardada. Vacío = se busca " +
+                 "'Btn_ContinuarPartida' en la escena.")]
+        [SerializeField] private GameObject botonContinuar;
+
+        private const string NombreBotonContinuar = "Btn_ContinuarPartida";
+
+        private void Start()
+        {
+            if (botonContinuar == null) botonContinuar = GameObject.Find(NombreBotonContinuar);
+
+            // Sin partida guardada, 'Continuar' haría lo mismo que 'Nueva Partida': confunde.
+            if (botonContinuar != null)
+            {
+                botonContinuar.SetActive(GameProgressManager.TieneProgresoGuardado());
+            }
+        }
 
         public void NuevaPartida()
         {
@@ -34,7 +52,14 @@ namespace CocinaBoliviana
 
         public void ContinuarPartida()
         {
-            int nivelGuardado = GameProgressManager.ObtenerNivelGuardado();
+            if (!GameProgressManager.TieneProgresoGuardado())
+            {
+                NuevaPartida();
+                return;
+            }
+
+            // El nivel en el que te quedaste (se empieza de nuevo), no el más alto desbloqueado.
+            int nivelGuardado = GameProgressManager.ObtenerNivelParaContinuar();
 
             int indiceNivel = Mathf.Clamp(nivelGuardado - 1, 0, (niveles != null && niveles.Length > 0) ? niveles.Length - 1 : 0);
             if (niveles != null && indiceNivel < niveles.Length && niveles[indiceNivel] != null)
@@ -48,13 +73,21 @@ namespace CocinaBoliviana
         }
 
         /// <summary>
-        /// Elige el nivel y entra. Se engancha a un boton por nivel en el menu: el indice es
+        /// Entra a un nivel concreto. Se engancha a un boton por nivel en el menu: el indice es
         /// la posicion en la lista 'niveles' (0=Cbba, 1=La Paz, 2=Santa Cruz).
+        ///
+        /// NO desbloquea nada: solo deja entrar a niveles ya ganados. Desbloquear es cosa de
+        /// superar el nivel anterior (LevelManager).
         /// </summary>
         public void JugarNivel(int indice)
         {
             int numeroNivel = indice + 1;
-            GameProgressManager.GuardarNivel(numeroNivel);
+            if (!GameProgressManager.EstaDesbloqueado(numeroNivel))
+            {
+                Debug.LogWarning($"[MainMenuController] El nivel {numeroNivel} está bloqueado: " +
+                                 "supera antes el anterior.");
+                return;
+            }
 
             if (niveles != null && indice >= 0 && indice < niveles.Length && niveles[indice] != null)
             {

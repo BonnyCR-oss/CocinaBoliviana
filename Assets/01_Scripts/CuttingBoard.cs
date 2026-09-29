@@ -101,6 +101,10 @@ namespace CocinaBoliviana
                 IngredientItem ingredient = other.GetComponentInParent<IngredientItem>();
                 if (ingredient == null || ingredient.IsCut) continue;
 
+                // Lo que no se puede cortar así como llega (el huevo con cáscara, el arroz)
+                // no se acopla: antes se quedaba pegado en la tabla sin hacer nada.
+                if (ingredient.Data != null && !ingredient.Data.PuedeCortarseEn(ingredient.EstadoCoccion)) continue;
+
                 // Solo acoplar si el jugador NO lo tiene agarrado con Grip
                 if (ingredient.GrabInteractable != null && ingredient.GrabInteractable.isSelected) continue;
 
@@ -149,18 +153,19 @@ namespace CocinaBoliviana
                 return;
             }
 
-            if (cortes.Count == 1)
-            {
-                tipoDeCorte = cortes[0].tipo;
-                Debug.Log($"[CuttingBoard] {ingredient.IngredientName}: único corte disponible, {tipoDeCorte}.");
-                return;
-            }
-
+            // Con un solo corte también se muestra el panel: así el jugador ve qué corte va a
+            // hacer (el tomate solo va en cubitos) en vez de que la tabla decida en silencio.
             if (corteMenu == null)
             {
+                if (cortes.Count == 1) tipoDeCorte = cortes[0].tipo;
                 Debug.LogWarning($"[CuttingBoard] {gameObject.name} no tiene 'corteMenu' asignado; se usa el corte fijo {tipoDeCorte}.");
                 return;
             }
+
+            // Por defecto el primero que SÍ sabe hacer este ingrediente: si se cierra el panel
+            // con la X, se corta así en vez de con el corte que quedó del anterior (que podía
+            // no existir para este y dejaba la tabla sin cortar).
+            tipoDeCorte = cortes[0].tipo;
 
             esperandoEleccionDeCorte = true;
             corteMenu.Show(cortes, corte => corte.tipo.ToString(), elegido =>
@@ -248,6 +253,12 @@ namespace CocinaBoliviana
             Vector3 pos = currentIngredient.transform.position;
             Quaternion rot = currentIngredient.transform.rotation;
 
+            // La cocción pasa al trozo: un huevo hervido picado sigue estando hervido.
+            EstadoCoccion estadoOrigen = currentIngredient.EstadoCoccion;
+            MetodoCoccion metodoOrigen = currentIngredient.MetodoCoccionUsado;
+            float progresoOrigen = currentIngredient.ProgresoCoccion;
+            bool transformadoOrigen = currentIngredient.YaTransformado;
+
             // Remove uncut ingredient
             Destroy(currentIngredient.gameObject);
             currentIngredient = null;
@@ -267,6 +278,7 @@ namespace CocinaBoliviana
                         cutItem.SetData(sourceData);
                     }
                     cutItem.SetCorteActual(tipoDeCorte);
+                    cutItem.CopiarCoccion(estadoOrigen, metodoOrigen, progresoOrigen, transformadoOrigen);
 
                     // Clavado donde quedo, para que no ruede ni lo empujen al pasar. No se
                     // registra como contenido de la tabla: asi queda libre para el siguiente

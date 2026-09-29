@@ -268,9 +268,9 @@ namespace CocinaBoliviana
 
             Transform handTransform = ResolveHandTransform(interactor, fallbackTransform);
 
-            // Con una sola opción no hay nada que elegir: se entrega directo y nos ahorramos
-            // un menú de un solo botón (es el caso de CleanPlates).
-            if (totalOpciones == 1)
+            // Con una sola opción también sale el panel, para que el jugador vea qué va a
+            // sacar. Solo se entrega directo si el dispensador no tiene menú asignado.
+            if (totalOpciones == 1 && menu == null)
             {
                 lastDispenseTime = Time.time;
                 IngredientData unico = opcionesIngredientes[0];

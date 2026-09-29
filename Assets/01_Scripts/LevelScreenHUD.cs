@@ -301,6 +301,26 @@ namespace CocinaBoliviana
             textoFeedbackPuntos.gameObject.SetActive(false);
         }
 
+        /// <summary>
+        /// Línea del récord guardado. LevelManager ya lo actualizó al terminar, así que aquí
+        /// se lee el valor nuevo y se compara con el de antes de la partida.
+        /// </summary>
+        private string TextoRecord()
+        {
+            int nivel = lm.NumeroNivel;
+            int record = GameProgressManager.ObtenerRecordPuntos(nivel);
+            int estrellas = GameProgressManager.ObtenerRecordEstrellas(nivel);
+            string barra = new string('★', estrellas) + new string('☆', 3 - estrellas);
+
+            if (lm.EsNuevoRecord)
+            {
+                return (lm.RecordAnterior > 0)
+                    ? $"<color=#FFD633><b>¡NUEVO RÉCORD!</b></color> (antes {lm.RecordAnterior})"
+                    : $"<color=#FFD633><b>¡Primer récord: {record}!</b></color>";
+            }
+            return $"Récord: <b>{record}</b>  {barra}";
+        }
+
         private void MostrarFinDeNivel()
         {
             if (endModalRoot == null || lm == null) return;
@@ -346,11 +366,21 @@ namespace CocinaBoliviana
 
             if (textoResumenStats != null)
             {
+                // Con la línea del récord son cinco: se encoge un poco en vez de cortar la
+                // última, que es justo la del récord.
+                if (!textoResumenStats.resizeTextForBestFit)
+                {
+                    textoResumenStats.resizeTextMaxSize = textoResumenStats.fontSize;
+                    textoResumenStats.resizeTextMinSize = Mathf.Min(14, textoResumenStats.fontSize);
+                    textoResumenStats.resizeTextForBestFit = true;
+                }
+
                 textoResumenStats.text =
                     $"Puntos Finales: <b>{lm.Puntos}</b> (Meta: {lm.Objetivo1Estrella})\n" +
                     $"Platos Entregados: <b>{lm.PlatosEntregados}</b>\n" +
                     $"Pedidos Perdidos: <b>{lm.PedidosPerdidos}</b>\n" +
-                    $"Mejor Racha: <b>x{lm.RachaMaxima}</b>";
+                    $"Mejor Racha: <b>x{lm.RachaMaxima}</b>\n" +
+                    TextoRecord();
             }
 
             if (botonSiguienteNivel != null)

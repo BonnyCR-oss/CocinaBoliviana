@@ -61,6 +61,9 @@ namespace CocinaBoliviana
         [Tooltip("Racha máxima acumulable para bonus.")]
         [SerializeField] private int maxNivelRacha = 4;
 
+        [Tooltip("Puntos que se restan por cada ingrediente tirado con 'Retirar todo' del plato.")]
+        [SerializeField] private int penalizacionPorIngredienteDesperdiciado = 5;
+
         [Header("Audio")]
         [SerializeField] private AudioClip sonidoCuentaAtras;
         [SerializeField] private AudioClip sonidoSilbatoInicio;
@@ -90,6 +93,12 @@ namespace CocinaBoliviana
         public int Objetivo1Estrella => objetivoPuntos1Estrella;
         public int Objetivo2Estrellas => objetivoPuntos2Estrellas;
         public int Objetivo3Estrellas => objetivoPuntos3Estrellas;
+
+        /// <summary>Récord de puntos de este nivel antes de la partida actual.</summary>
+        public int RecordAnterior { get; private set; }
+
+        /// <summary>true si la partida que acaba de terminar superó el récord.</summary>
+        public bool EsNuevoRecord { get; private set; }
 
         public bool NivelSuperado => Puntos >= objetivoPuntos1Estrella;
         public int EstrellasConseguidas => CalcularEstrellas();
@@ -129,36 +138,17 @@ namespace CocinaBoliviana
         }
 
         /// <summary>
-        /// Vuelca el LevelData elegido sobre los campos del Inspector. Asi la MISMA escena
-        /// sirve para los tres departamentos: lo unico que cambia es que asset se eligio.
+        /// Vuelca el LevelData de ESTA escena sobre los campos del Inspector.
         ///
-        /// Si no hay ninguno elegido se respeta lo puesto a mano, que es lo comodo para
-        /// probar dando a Play en la escena de cocina sin pasar por el menu.
+        /// Cada nivel tiene su propia escena, así que manda el 'Nivel Por Defecto' de la
+        /// escena: da igual lo que viniera en LevelSelection desde el menú o desde el nivel
+        /// anterior. Solo una escena sin nivel propio (la First Scene de pruebas) usa el
+        /// elegido en el menú.
         /// </summary>
         private void AplicarNivel()
         {
-            // Determinar qué LevelData corresponde a esta escena:
-            // Si la escena tiene un 'nivelPorDefecto' específico (Nivel 1, Nivel 2 o Nivel 3),
-            // y LevelSelection.Elegido pertenece a otro nivel diferente (por ejemplo, al pasar
-            // de Nivel 1 a Nivel 2 mediante 'Siguiente Nivel'), se sincroniza con el nivel propio de esta escena.
-            LevelData nivel = nivelPorDefecto;
-
-            if (LevelSelection.Elegido != null)
-            {
-                if (nivelPorDefecto == null || LevelSelection.Elegido == nivelPorDefecto)
-                {
-                    nivel = LevelSelection.Elegido;
-                }
-                else
-                {
-                    LevelSelection.Elegido = nivelPorDefecto;
-                    nivel = nivelPorDefecto;
-                }
-            }
-            else
-            {
-                LevelSelection.Elegido = nivelPorDefecto;
-            }
+            LevelData nivel = (nivelPorDefecto != null) ? nivelPorDefecto : LevelSelection.Elegido;
+            LevelSelection.Elegido = nivel;
 
             if (nivel == null) return;
 
@@ -168,8 +158,10 @@ namespace CocinaBoliviana
             objetivoPuntos2Estrellas = nivel.objetivoPuntos2Estrellas;
             objetivoPuntos3Estrellas = nivel.objetivoPuntos3Estrellas;
 
-            // Sincronizar número de nivel con el asset activo
-            if (nivel.nombreNivel.Contains("1") || nivel.nombreNivel.Contains("Cochabamba")) numeroNivel = 1;
+            // El número sale del asset. Antes se deducía buscando "1", "2" o "3" en el
+            // nombre, y renombrar un nivel lo rompía. Queda como respaldo para assets viejos.
+            if (nivel.numeroNivel >= GameProgressManager.NivelMinimo) numeroNivel = nivel.numeroNivel;
+            else if (nivel.nombreNivel.Contains("1") || nivel.nombreNivel.Contains("Cochabamba")) numeroNivel = 1;
             else if (nivel.nombreNivel.Contains("2") || nivel.nombreNivel.Contains("La Paz")) numeroNivel = 2;
             else if (nivel.nombreNivel.Contains("3") || nivel.nombreNivel.Contains("Santa Cruz")) numeroNivel = 3;
 
@@ -187,6 +179,9 @@ namespace CocinaBoliviana
 
         private void Start()
         {
+            // Este es ahora el nivel "en curso": si sales al menú, 'Continuar' vuelve aquí.
+            GameProgressManager.GuardarNivelEnCurso(numeroNivel);
+
             levelLoopRoutine = StartCoroutine(LevelLoop());
         }
 
@@ -240,6 +235,10 @@ namespace CocinaBoliviana
             }
 
             // 3. Fase de Fin de Nivel
+            // El récord se guarda ANTES de avisar: la pantalla final lo lee al abrirse.
+            RecordAnterior = GameProgressManager.ObtenerRecordPuntos(numeroNivel);
+            EsNuevoRecord = GameProgressManager.GuardarResultado(numeroNivel, Puntos, EstrellasConseguidas);
+
             Estado = LevelState.Finished;
             OnStateChanged?.Invoke(Estado);
 
@@ -253,6 +252,8 @@ namespace CocinaBoliviana
                 if (numeroNivel < GameProgressManager.NivelMaximo)
                 {
                     GameProgressManager.GuardarNivel(numeroNivel + 1);
+                    // Superado: 'Continuar' ya lleva al siguiente, no a repetir este.
+                    GameProgressManager.GuardarNivelEnCurso(numeroNivel + 1);
                 }
             }
             else
@@ -312,6 +313,27 @@ namespace CocinaBoliviana
             OnStreakChanged?.Invoke(RachaActual, 0);
         }
 
+        /// <summary>
+        /// Llamado por el plato de emplatado al vaciarlo con 'Retirar todo'. Resta por cada
+        /// ingrediente tirado, sin bajar de 0. No corta la racha: equivocarse armando un plato
+        /// no es lo mismo que dejar caducar un pedido.
+        /// </summary>
+        /// <returns>Los puntos que se restaron de verdad (0 si no había que quitar).</returns>
+        public int RegistrarDesperdicio(int ingredientes)
+        {
+            if (Estado != LevelState.Playing || ingredientes <= 0) return 0;
+
+            int puntosPrevios = Puntos;
+            Puntos = Mathf.Max(0, Puntos - ingredientes * penalizacionPorIngredienteDesperdiciado);
+            int delta = Puntos - puntosPrevios;
+
+            Sonar(sonidoPedidoPerdido);
+            Debug.Log($"[LevelManager] Desperdicio: {ingredientes} ingrediente(s) tirados. {delta} pts. Total: {Puntos}");
+
+            OnScoreChanged?.Invoke(Puntos, delta, RachaActual);
+            return -delta;
+        }
+
         public int CalcularEstrellas()
         {
             if (Puntos >= objetivoPuntos3Estrellas) return 3;
@@ -339,8 +361,16 @@ namespace CocinaBoliviana
             int siguiente = numeroNivel + 1;
             if (siguiente <= GameProgressManager.NivelMaximo)
             {
-                // Guardar avance en progreso persistente
-                GameProgressManager.GuardarNivel(siguiente);
+                // Solo se desbloquea habiendo superado este. El botón ya se oculta si no,
+                // pero así ninguna otra llamada puede saltarse un nivel.
+                if (NivelSuperado) GameProgressManager.GuardarNivel(siguiente);
+
+                if (!GameProgressManager.EstaDesbloqueado(siguiente))
+                {
+                    Debug.LogWarning($"[LevelManager] El nivel {siguiente} aún está bloqueado.");
+                    IrAlMenuPrincipal();
+                    return;
+                }
 
                 // Limpiar la referencia estática previa para que la nueva escena tome limpiamente su nivel
                 LevelSelection.Elegido = null;

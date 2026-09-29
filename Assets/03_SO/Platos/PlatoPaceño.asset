@@ -20,18 +20,23 @@ MonoBehaviour:
     corte: 0
     debeEstarCocido: 1
     metodo: 0
-  - ingrediente: {fileID: 11400000, guid: 78b407d58f3f88c42a2253ad59733dd1, type: 2}
+  - ingrediente: {fileID: 11400000, guid: da37c04e5e709d7d2ab901859c7c7917, type: 2}
+    corte: 0
+    debeEstarCocido: 1
+    metodo: 1
+  - ingrediente: {fileID: 11400000, guid: 3474c24cbd3fdbe49bebd82e3665f1e7, type: 2}
     corte: 0
     debeEstarCocido: 1
     metodo: 0
-  - ingrediente: {fileID: 11400000, guid: 097b3d3170724bf489fba75f73d22b6a, type: 2}
+  - ingrediente: {fileID: 11400000, guid: f55f17e5883523549802ffd1a41fe8fe, type: 2}
     corte: 0
     debeEstarCocido: 1
     metodo: 1
-  - ingrediente: {fileID: 11400000, guid: da37c04e5e709d7d2ab901859c7c7917, type: 2}
-    corte: 2
+  - ingrediente: {fileID: 11400000, guid: 945c349a870f2074693d18b93c268647, type: 2}
+    corte: 0
     debeEstarCocido: 1
-    metodo: 1
+    metodo: 0
+  entregaDirecta: 0
   ingredientesRequeridos: []
   colorLiquido: {r: 0.78, g: 0.45, b: 0.12, a: 1}
   tiempoLimite: 80

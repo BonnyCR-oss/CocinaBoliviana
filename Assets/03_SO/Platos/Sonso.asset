@@ -20,10 +20,7 @@ MonoBehaviour:
     corte: 0
     debeEstarCocido: 1
     metodo: 2
-  - ingrediente: {fileID: 11400000, guid: 097b3d3170724bf489fba75f73d22b6a, type: 2}
-    corte: 0
-    debeEstarCocido: 1
-    metodo: 1
+  entregaDirecta: 1
   ingredientesRequeridos: []
   colorLiquido: {r: 0.78, g: 0.45, b: 0.12, a: 1}
   tiempoLimite: 50

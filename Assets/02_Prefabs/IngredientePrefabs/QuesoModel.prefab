@@ -94,9 +94,9 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3891295478707799998}
   serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_Mass: 0.3
+  m_LinearDamping: 0.6
+  m_AngularDamping: 6
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -110,7 +110,7 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 0
 --- !u!65 &3013021273947089947
@@ -120,7 +120,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3891295478707799998}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 498ffeea983591c46a955bb5b19eee5c, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -132,8 +132,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.9801636, y: 0.77324337, z: 0.1820614}
-  m_Center: {x: 0, y: 0.38662153, z: 0.024924649}
+  m_Size: {x: 0.9801636, y: 0.2319107, z: 0.7882689}
+  m_Center: {x: 0, y: 0.39413455, z: -0.000000037252903}
 --- !u!114 &-3109699864588329878
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -215,7 +215,7 @@ MonoBehaviour:
   m_MatchAttachRotation: 1
   m_SnapToColliderVolume: 1
   m_ReinitializeDynamicAttachEverySingleGrab: 1
-  m_AttachEaseInTime: 0.15
+  m_AttachEaseInTime: 0
   m_MovementType: 2
   m_PredictedVisualsTransform: {fileID: 0}
   m_VelocityDamping: 1
@@ -276,7 +276,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f850691bbc15cb479c2e20ddced44f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CocinaBoliviana.IngredientItem
-  ingredientName: Tomate
+  ingredientName: Queso
   isCut: 0
   cutPrefab: {fileID: 0}
   data: {fileID: 11400000, guid: f55f17e5883523549802ffd1a41fe8fe, type: 2}

@@ -16,8 +16,8 @@ MonoBehaviour:
   icono: {fileID: 21300000, guid: 28c614268d2ec82d8b7edd18114f8338, type: 3}
   platoPrefab: {fileID: 2173394486283358122, guid: a0165dbca4f3067418ed444b5644ae53, type: 3}
   receta:
-  - ingrediente: {fileID: 11400000, guid: da37c04e5e709d7d2ab901859c7c7917, type: 2}
-    corte: 2
+  - ingrediente: {fileID: 11400000, guid: 061ae01ce64224a4690e7f66c0026b09, type: 2}
+    corte: 0
     debeEstarCocido: 1
     metodo: 1
   - ingrediente: {fileID: 11400000, guid: 45dfd7abe0b0f0484b1eded2b6205b6c, type: 2}
@@ -40,7 +40,8 @@ MonoBehaviour:
     corte: 2
     debeEstarCocido: 0
     metodo: 0
+  entregaDirecta: 0
   ingredientesRequeridos: []
   colorLiquido: {r: 0.78, g: 0.45, b: 0.12, a: 1}
-  tiempoLimite: 90
-  puntos: 60
+  tiempoLimite: 120
+  puntos: 50

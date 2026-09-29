@@ -178,9 +178,19 @@ namespace CocinaBoliviana
 
             if (contador == null) return;
 
-            if (platedIngredients.Count == 0 || recetasConocidas == null || recetasConocidas.Count == 0)
+            if (platedIngredients.Count == 0)
             {
                 contador.Ocultar();
+                return;
+            }
+
+            // El botón 'Retirar todo' vive en el cartel: tiene que estar enganchado siempre
+            // que haya comida, forme o no una receta.
+            contador.SetAccionRetirar(RetirarTodo);
+
+            if (recetasConocidas == null || recetasConocidas.Count == 0)
+            {
+                contador.MostrarSinReceta(platedIngredients.Count);
                 return;
             }
 
@@ -191,6 +201,9 @@ namespace CocinaBoliviana
             foreach (var plato in recetasConocidas)
             {
                 if (plato == null || plato.receta == null || plato.receta.Count == 0) continue;
+
+                // Los de entrega directa (el sonso) no se arman aquí: van solos al mostrador.
+                if (plato.entregaDirecta) continue;
 
                 // Copia para ir tachando: así una receta que pide dos papas necesita dos.
                 var pendientes = new List<IngredienteRequerido>(plato.receta);
@@ -228,7 +241,9 @@ namespace CocinaBoliviana
 
             if (mejor == null || mejorAciertos <= 0)
             {
-                contador.Ocultar();
+                // Antes el cartel se ocultaba y no había forma de saber que esa mezcla no
+                // lleva a ningún plato, ni de vaciarla de golpe.
+                contador.MostrarSinReceta(platedIngredients.Count);
                 return;
             }
 
@@ -315,6 +330,34 @@ namespace CocinaBoliviana
 
             // El plato de emplatado ya cumplió: ahora el plato servido ocupa su lugar.
             Destroy(gameObject);
+        }
+
+        /// <summary>
+        /// Tira todo lo que haya en el plato para empezar de cero. Cuesta puntos por cada
+        /// ingrediente (ver LevelManager): es comida desperdiciada. Para quitar solo uno
+        /// sigue valiendo agarrarlo con el grip, que no penaliza.
+        /// </summary>
+        public void RetirarTodo()
+        {
+            if (EstaCompleto) return;
+
+            platedIngredients.RemoveAll(i => i == null);
+            int cantidad = platedIngredients.Count;
+            if (cantidad == 0) return;
+
+            foreach (var item in platedIngredients)
+            {
+                // Desactivar antes de destruir: si no, el trigger del plato los vería aún
+                // este frame y los volvería a emplatar.
+                item.gameObject.SetActive(false);
+                Destroy(item.gameObject);
+            }
+            platedIngredients.Clear();
+
+            if (contador != null) contador.Ocultar();
+
+            int restados = (LevelManager.Instance != null) ? LevelManager.Instance.RegistrarDesperdicio(cantidad) : 0;
+            Debug.Log($"[PlateItem] Plato vaciado: {cantidad} ingrediente(s) desperdiciados (-{restados} pts).");
         }
 
         public void ReleaseIngredient(IngredientItem ingredient)

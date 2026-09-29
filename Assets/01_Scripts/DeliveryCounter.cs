@@ -1,5 +1,7 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using CocinaBoliviana.Data;
 
 namespace CocinaBoliviana
 {
@@ -223,29 +225,135 @@ namespace CocinaBoliviana
             Collider[] dentro = Physics.OverlapBox(centro, zonaDeteccion * 0.5f, transform.rotation,
                                                    ~0, QueryTriggerInteraction.Ignore);
 
+            vistos.Clear();
+
             foreach (var col in dentro)
             {
                 var plato = col.GetComponentInParent<ServedDish>();
-                if (plato == null || plato.Plato == null) continue;
+                if (plato != null && plato.Plato != null)
+                {
+                    vistos.Add(plato.gameObject);
+                    var grab = plato.GetComponent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
+                    if (grab != null && grab.isSelected) continue;
+                    if (!TocaIntentar(plato.gameObject)) continue;
 
-                var grab = plato.GetComponent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
-                if (grab != null && grab.isSelected) continue;
+                    if (Procesar(plato.Plato, plato.gameObject, avisarSiFalla: EsPrimerIntento(plato.gameObject))) return;
+                    AnotarRechazo(plato.gameObject);
+                    continue;
+                }
 
-                Procesar(plato);
-                return;
+                var item = col.GetComponentInParent<IngredientItem>();
+                if (item != null)
+                {
+                    vistos.Add(item.gameObject);
+                    if (ProcesarEntregaDirecta(item)) return;
+                }
             }
+
+            // Lo que ya no está en el mostrador se olvida: si lo vuelven a dejar, vuelve a
+            // avisar del rechazo como la primera vez.
+            olvidar.Clear();
+            foreach (var par in rechazados)
+            {
+                if (par.Key == null || !vistos.Contains(par.Key)) olvidar.Add(par.Key);
+            }
+            foreach (var o in olvidar) rechazados.Remove(o);
         }
 
-        private void Procesar(ServedDish plato)
+        /// <summary>
+        /// Objetos rechazados y cuándo se vuelven a intentar. Sin esto, un refresco que nadie
+        /// pidió sonaba a "rechazo" diez veces por segundo mientras siguiera en el mostrador.
+        /// Se reintenta en silencio cada poco, por si mientras tanto entra un pedido que lo pida.
+        /// </summary>
+        private readonly Dictionary<GameObject, float> rechazados = new Dictionary<GameObject, float>();
+        private readonly HashSet<GameObject> vistos = new HashSet<GameObject>();
+        private readonly List<GameObject> olvidar = new List<GameObject>();
+
+        private const float SegundosEntreReintentos = 1f;
+
+        private bool EsPrimerIntento(GameObject o) => !rechazados.ContainsKey(o);
+
+        private bool TocaIntentar(GameObject o) =>
+            !rechazados.TryGetValue(o, out float cuando) || Time.time >= cuando;
+
+        private void AnotarRechazo(GameObject o) => rechazados[o] = Time.time + SegundosEntreReintentos;
+
+        /// <summary>
+        /// Platos que se entregan sin emplatar, como el sonso: el mismo objeto que sale de la
+        /// parrilla. Solo cuenta si ese ingrediente es el de algún plato de entrega directa
+        /// del departamento; cualquier otro (un tomate olvidado) se ignora en silencio.
+        /// </summary>
+        private bool ProcesarEntregaDirecta(IngredientItem item)
+        {
+            if (item.Data == null) return false;
+            if (item.GrabInteractable != null && item.GrabInteractable.isSelected) return false;
+            if (!TocaIntentar(item.gameObject)) return false;
+
+            var manager = OrderManager.Instancia;
+            var depto = (manager != null) ? manager.Departamento : null;
+            if (depto == null || depto.comidas == null) return false;
+
+            bool esSuIngrediente = false;
+            foreach (var plato in depto.comidas)
+            {
+                IngredienteRequerido req = RequisitoUnico(plato);
+                if (req == null || req.ingrediente != item.Data) continue;
+
+                esSuIngrediente = true;
+                if (req.LoCumple(item.Data, item.CorteActual, item.EstadoCoccion, item.MetodoCoccionUsado))
+                {
+                    if (Procesar(plato, item.gameObject, avisarSiFalla: EsPrimerIntento(item.gameObject))) return true;
+                    AnotarRechazo(item.gameObject);
+                    return false;
+                }
+            }
+
+            if (!esSuIngrediente) return false;
+
+            // Es un sonso, pero crudo o quemado.
+            if (EsPrimerIntento(item.gameObject))
+            {
+                RechazarVisual();
+                Debug.Log($"[DeliveryCounter] {item.IngredientName} rechazado: {EstadoTexto(item)}.");
+            }
+            AnotarRechazo(item.gameObject);
+            return false;
+        }
+
+        /// <summary>El único ingrediente de un plato de entrega directa, o null si no lo es.</summary>
+        private static IngredienteRequerido RequisitoUnico(DishData plato)
+        {
+            if (plato == null || !plato.entregaDirecta || plato.receta == null) return null;
+
+            IngredienteRequerido unico = null;
+            foreach (var r in plato.receta)
+            {
+                if (r == null || r.ingrediente == null) continue; // referencias rotas no cuentan
+                if (unico != null) return null;                  // más de uno: se emplata
+                unico = r;
+            }
+            return unico;
+        }
+
+        private static string EstadoTexto(IngredientItem item)
+        {
+            return item.EstaQuemado ? "está quemado"
+                 : item.EstadoCoccion == EstadoCoccion.Crudo ? "está crudo"
+                 : "no está como lo piden";
+        }
+
+        /// <param name="avisarSiFalla">Sonido y luz de rechazo. Solo la primera vez por objeto.</param>
+        /// <returns>true si algún pedido lo esperaba.</returns>
+        private bool Procesar(DishData platoData, GameObject objeto, bool avisarSiFalla)
         {
             var manager = OrderManager.Instancia;
             if (manager == null)
             {
                 Debug.LogWarning("[DeliveryCounter] No hay OrderManager en la escena; no se puede entregar.");
-                return;
+                return false;
             }
 
-            if (manager.Entregar(plato.Plato))
+            if (manager.Entregar(platoData))
             {
                 Sonar(sonidoAcierto);
 
@@ -268,18 +376,28 @@ namespace CocinaBoliviana
                     DestellarLuz(new Color(0.2f, 1f, 0.4f), 3.5f, 1.0f);
                 }
 
-                Destroy(plato.gameObject);
+                // Desactivar antes de destruir: Destroy espera al final del frame y el
+                // siguiente sondeo podría volver a entregarlo.
+                objeto.SetActive(false);
+                Destroy(objeto);
+                return true;
             }
-            else
+
+            if (avisarSiFalla)
             {
-                Sonar(sonidoRechazo);
+                RechazarVisual();
+                Debug.Log($"[DeliveryCounter] {platoData.nombre} rechazado: ningún pedido lo espera.");
+            }
+            return false;
+        }
 
-                if (luzFeedback != null)
-                {
-                    DestellarLuz(new Color(1f, 0.3f, 0.1f), 2.8f, 0.6f);
-                }
+        private void RechazarVisual()
+        {
+            Sonar(sonidoRechazo);
 
-                Debug.Log($"[DeliveryCounter] {plato.Plato.nombre} rechazado: ningún pedido lo espera.");
+            if (luzFeedback != null)
+            {
+                DestellarLuz(new Color(1f, 0.3f, 0.1f), 2.8f, 0.6f);
             }
         }
 

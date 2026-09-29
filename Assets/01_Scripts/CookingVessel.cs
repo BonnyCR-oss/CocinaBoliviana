@@ -126,6 +126,8 @@ namespace CocinaBoliviana
 
         private void Agregar(IngredientItem item)
         {
+            item = TransformarAlEntrar(item);
+
             contenido.Add(item);
             item.SetMetodoCoccion(metodo);
 
@@ -141,6 +143,43 @@ namespace CocinaBoliviana
             if (apoyarSobrePunto) Apoyar(item, pos);
 
             Debug.Log($"[CookingVessel] {name}: entra {item.IngredientName} ({contenido.Count}/{capacidad}).");
+        }
+
+        /// <summary>
+        /// Si el ingrediente tiene otra forma para este método (huevo con cáscara → huevo
+        /// estrellado en el sartén), lo cambia por ese prefab. El nuevo hereda el dato y el
+        /// corte, así que para las recetas sigue siendo "Huevo" y se valida igual que antes.
+        /// </summary>
+        private IngredientItem TransformarAlEntrar(IngredientItem item)
+        {
+            if (item.Data == null || item.YaTransformado) return item;
+
+            GameObject prefab = item.Data.ObtenerPrefabParaCoccion(metodo);
+            if (prefab == null) return item;
+
+            GameObject go = Instantiate(prefab, item.transform.position, item.transform.rotation);
+            go.name = prefab.name;
+
+            var nuevo = go.GetComponent<IngredientItem>();
+            if (nuevo == null)
+            {
+                Debug.LogWarning($"[CookingVessel] '{prefab.name}' no tiene IngredientItem; " +
+                                 $"{item.IngredientName} entra sin transformarse. Corre 'Setup Ingredient Prefabs'.");
+                Destroy(go);
+                return item;
+            }
+
+            nuevo.SetData(item.Data);
+            nuevo.SetCorteActual(item.CorteActual);
+            nuevo.MarcarTransformado();
+
+            // Desactivar antes de destruir: el siguiente sondeo lo vería aún y lo metería
+            // otra vez.
+            item.gameObject.SetActive(false);
+            Destroy(item.gameObject);
+
+            Debug.Log($"[CookingVessel] {name}: {prefab.name} sustituye a {item.name} al {metodo}.");
+            return nuevo;
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using CocinaBoliviana.Data;
 
 namespace CocinaBoliviana
@@ -53,10 +54,36 @@ namespace CocinaBoliviana
                  "vacío, aparece en el sitio del vaso y estorba al siguiente.")]
         [SerializeField] private Transform puntoServido;
 
+        [Header("Bloqueo mientras sirve")]
+        [Tooltip("Segundos tras servir un vaso antes de ofrecer el siguiente. Evita que la " +
+                 "misma pulsación que acaba de servir pulse sin querer el 'Servir' del vaso nuevo.")]
+        [SerializeField] private float pausaTrasServir = 0.8f;
+
+        [Tooltip("Si se cierra el menú con la X sin servir, cuánto tarda en volver a salir.")]
+        [SerializeField] private float reabrirMenuTras = 2f;
+
+        [Tooltip("Altura del cartel 'Llenando…' sobre el punto de llenado, en metros.")]
+        [SerializeField] private float alturaCartel = 0.28f;
+
         private DrinkCup vasoActual;
         private float progreso;
         private bool sirviendo;
         private AudioSource audioSource;
+        private float bloqueadoHasta;
+        private float reabrirMenuEn = -1f;
+        private Text cartel;
+
+        /// <summary>
+        /// La raíz del cartel. Se guarda aparte porque Text.canvas devuelve null mientras el
+        /// cartel está oculto, y era justo cuando hacía falta para volver a mostrarlo.
+        /// </summary>
+        private GameObject cartelRaiz;
+
+        /// <summary>
+        /// true mientras un vaso se está llenando. En ese tiempo no se puede volver a pedir
+        /// que sirva: el botón no sale y cualquier pulsación se ignora.
+        /// </summary>
+        public bool Llenando => sirviendo && vasoActual != null;
 
         private void Awake()
         {
@@ -130,6 +157,9 @@ namespace CocinaBoliviana
 
             if (vasoActual != null) return;
 
+            // Recién servido: se espera un momento antes de ofrecer el vaso nuevo.
+            if (Time.time < bloqueadoHasta) return;
+
             Collider[] dentro = Physics.OverlapBox(CentroZona, zonaDeteccion * 0.5f, transform.rotation,
                                                    ~0, QueryTriggerInteraction.Ignore);
 
@@ -179,7 +209,23 @@ namespace CocinaBoliviana
                 return;
             }
 
-            menu.Show(new[] { "Servir" }, opcion => opcion, _ => sirviendo = true);
+            // Ya está sirviendo: no se ofrece otra vez el botón.
+            if (sirviendo || menu.IsOpen) return;
+
+            reabrirMenuEn = -1f;
+            menu.Show(new[] { "Servir" }, opcion => opcion, _ => EmpezarAServir(),
+                      onCancel: () => reabrirMenuEn = Time.time + reabrirMenuTras);
+        }
+
+        /// <summary>
+        /// Lo dispara el botón 'Servir'. Si ya había arrancado (doble clic, el rayo pulsando
+        /// dos veces) no hace nada: el vaso sigue llenándose una sola vez.
+        /// </summary>
+        private void EmpezarAServir()
+        {
+            if (vasoActual == null || sirviendo) return;
+            sirviendo = true;
+            reabrirMenuEn = -1f;
         }
 
         private void Servir()
@@ -195,6 +241,8 @@ namespace CocinaBoliviana
             {
                 vasoActual = null;
                 sirviendo = false;
+                reabrirMenuEn = -1f;
+                MostrarCartel(null);
                 if (menu != null && menu.IsOpen) menu.Hide();
                 PararChorro();
                 return;
@@ -212,6 +260,14 @@ namespace CocinaBoliviana
             if (!sirviendo)
             {
                 PararChorro();
+                MostrarCartel(null);
+
+                // Se cerró el menú con la X: vuelve a salir al rato, o el vaso se quedaría
+                // debajo del grifo sin forma de servirlo.
+                if (menu != null && !menu.IsOpen && reabrirMenuEn > 0f && Time.time >= reabrirMenuEn)
+                {
+                    PedirConfirmacion();
+                }
                 return;
             }
 
@@ -219,6 +275,7 @@ namespace CocinaBoliviana
 
             progreso += Time.fixedDeltaTime / Mathf.Max(segundosEnLlenar, 0.01f);
             vasoActual.SetLlenado(progreso);
+            MostrarCartel($"Llenando…  {Mathf.RoundToInt(Mathf.Clamp01(progreso) * 100f)}%");
 
             if (progreso < 1f) return;
 
@@ -226,8 +283,82 @@ namespace CocinaBoliviana
             vasoActual = null;
             progreso = 0f;
             sirviendo = false;
+            bloqueadoHasta = Time.time + pausaTrasServir;
             if (menu != null && menu.IsOpen) menu.Hide();
             PararChorro();
+            MostrarCartel(null);
+        }
+
+        /// <summary>
+        /// Cartel flotante de estado. Se crea por código la primera vez: así funciona en las
+        /// tres escenas sin tener que añadirlo a mano en cada una. null lo oculta.
+        /// </summary>
+        private void MostrarCartel(string mensaje)
+        {
+            if (mensaje == null)
+            {
+                if (cartelRaiz != null && cartelRaiz.activeSelf) cartelRaiz.SetActive(false);
+                return;
+            }
+
+            if (cartelRaiz == null) CrearCartel();
+
+            Transform raiz = cartelRaiz.transform;
+            raiz.gameObject.SetActive(true);
+            cartel.text = mensaje;
+
+            Vector3 baseCartel = (puntoLlenado != null) ? puntoLlenado.position : transform.position;
+            raiz.position = baseCartel + Vector3.up * alturaCartel;
+
+            Camera cam = Camera.main;
+            if (cam != null)
+            {
+                Vector3 dir = raiz.position - cam.transform.position;
+                dir.y = 0f;
+                if (dir.sqrMagnitude > 0.0001f) raiz.rotation = Quaternion.LookRotation(dir);
+            }
+        }
+
+        private void CrearCartel()
+        {
+            var canvasGo = new GameObject("Cartel_Llenando", typeof(RectTransform), typeof(Canvas));
+            cartelRaiz = canvasGo;
+            canvasGo.transform.SetParent(transform, true);
+            canvasGo.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
+            canvasGo.GetComponent<RectTransform>().sizeDelta = new Vector2(320f, 70f);
+
+            // Escala de MUNDO 1 px = 1 mm, aunque la estación esté escalada.
+            Vector3 lossy = transform.lossyScale;
+            canvasGo.transform.localScale = new Vector3(
+                0.001f / Mathf.Max(Mathf.Abs(lossy.x), 0.0001f),
+                0.001f / Mathf.Max(Mathf.Abs(lossy.y), 0.0001f),
+                0.001f / Mathf.Max(Mathf.Abs(lossy.z), 0.0001f));
+
+            var fondo = new GameObject("Fondo", typeof(RectTransform), typeof(Image));
+            fondo.transform.SetParent(canvasGo.transform, false);
+            var rtFondo = fondo.GetComponent<RectTransform>();
+            rtFondo.anchorMin = Vector2.zero;
+            rtFondo.anchorMax = Vector2.one;
+            rtFondo.offsetMin = Vector2.zero;
+            rtFondo.offsetMax = Vector2.zero;
+            var img = fondo.GetComponent<Image>();
+            img.color = new Color(0f, 0f, 0f, 0.72f);
+            img.raycastTarget = false;
+
+            var textoGo = new GameObject("Texto", typeof(RectTransform), typeof(Text));
+            textoGo.transform.SetParent(fondo.transform, false);
+            var rtTexto = textoGo.GetComponent<RectTransform>();
+            rtTexto.anchorMin = Vector2.zero;
+            rtTexto.anchorMax = Vector2.one;
+            rtTexto.offsetMin = Vector2.zero;
+            rtTexto.offsetMax = Vector2.zero;
+
+            cartel = textoGo.GetComponent<Text>();
+            cartel.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            cartel.fontSize = 34;
+            cartel.alignment = TextAnchor.MiddleCenter;
+            cartel.color = new Color(1f, 0.85f, 0.4f);
+            cartel.raycastTarget = false;
         }
 
         private bool SigueDebajo(DrinkCup vaso)

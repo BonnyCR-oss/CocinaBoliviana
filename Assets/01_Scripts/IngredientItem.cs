@@ -51,6 +51,27 @@ namespace CocinaBoliviana
         /// </summary>
         public float ProgresoCoccion { get; private set; }
 
+        /// <summary>
+        /// true si este objeto ya es el resultado de meterlo en un recipiente (el huevo
+        /// estrellado que salió del huevo con cáscara). Así no se vuelve a transformar si se
+        /// saca y se mete otra vez, ni se convierte en otra cosa en un recipiente distinto.
+        /// </summary>
+        public bool YaTransformado { get; private set; }
+
+        public void MarcarTransformado() => YaTransformado = true;
+
+        /// <summary>
+        /// Hereda la cocción de otro: al picar un huevo ya hervido, el picado sigue estando
+        /// hervido. Sin esto el trozo nacía crudo y no valía para ninguna receta.
+        /// </summary>
+        public void CopiarCoccion(EstadoCoccion estado, MetodoCoccion metodo, float progreso, bool transformado)
+        {
+            metodoCoccionUsado = metodo;
+            YaTransformado = transformado;
+            if (progreso > 0f) SetProgresoCoccion(progreso);
+            else estadoCoccion = estado;
+        }
+
         public void SetData(IngredientData nuevoData)
         {
             data = nuevoData;
@@ -86,7 +107,15 @@ namespace CocinaBoliviana
         private void Awake()
         {
             rb = GetComponent<Rigidbody>();
+            // Sin interpolación el objeto se dibuja al ritmo de la física (50/s) y no al del
+            // casco (72-90/s): al moverse o llevarlo en la mano se ve a saltos, como si el
+            // juego fuera lento. Los prefabs recién hechos a mano la traen apagada.
+            if (rb != null) rb.interpolation = RigidbodyInterpolation.Interpolate;
             grabInteractable = GetComponent<XRGrabInteractable>();
+            // XRI guarda la escala al agarrar y la reaplica al soltar. Si se agarra desde la
+            // tabla (escalada 0.45 / 0.02 / 0.35) guarda la local de ese momento y el
+            // ingrediente crecía al caer. La escala la lleva RestaurarEscala, no el agarre.
+            if (grabInteractable != null) grabInteractable.trackScale = false;
             // La que trae el prefab. Sin padre, localScale == escala de mundo.
             escalaDeMundoOriginal = transform.localScale;
 
@@ -181,6 +210,9 @@ namespace CocinaBoliviana
             {
                 rb.isKinematic = false;
             }
+
+            // Por si algo la tocó mientras se llevaba en la mano.
+            if (transform.parent == null) RestaurarEscala();
         }
 
         /// <summary>
@@ -335,9 +367,12 @@ namespace CocinaBoliviana
         {
             if (renderers == null) return;
 
+            // Un modelo que ya es el plato cocinado (huevo estrellado, huevo hervido) no se
+            // dora: se vería marrón. Se queda con su color hasta pasarse, y ahí se quema.
+            Color listo = YaTransformado ? Color.white : ColorCocido;
             Color tinte = progreso <= 1f
-                ? Color.Lerp(Color.white, ColorCocido, Mathf.Clamp01(progreso))
-                : Color.Lerp(ColorCocido, ColorQuemado, Mathf.Clamp01(progreso - 1f));
+                ? Color.Lerp(Color.white, listo, Mathf.Clamp01(progreso))
+                : Color.Lerp(listo, ColorQuemado, Mathf.Clamp01(progreso - 1f));
 
             for (int i = 0; i < renderers.Length; i++)
             {
